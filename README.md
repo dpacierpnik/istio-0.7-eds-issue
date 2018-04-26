@@ -13,7 +13,7 @@
 1. Clone this repository under your GOPATH src:
 
    ```bash
-   export ISTIO_ISSUE_PATH=$GOPATH/src/dpacierpnik
+   export ISTIO_ISSUE_PATH=$GOPATH/src/github.com/dpacierpnik
    mkdir -p $ISTIO_ISSUE_PATH
    cd $ISTIO_ISSUE_PATH
    git clone $this_repo
