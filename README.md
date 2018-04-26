@@ -42,6 +42,12 @@
    ./install-istio.sh
    ```
       
+1. Enable Istio sidecar injection for default namespaces:
+
+   ```bash
+   kubectl label namespace default istio-injection=enabled
+   ```
+      
 1. Run application with test scenario:
 
    1. Ensure dependencies, and build app:
