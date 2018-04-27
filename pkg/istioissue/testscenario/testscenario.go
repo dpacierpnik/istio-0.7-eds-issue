@@ -1,22 +1,26 @@
 package testscenario
 
 import (
+	"fmt"
 	log "github.com/sirupsen/logrus"
 	k8sApps "k8s.io/api/apps/v1"
 	k8sCore "k8s.io/api/core/v1"
 	k8sExts "k8s.io/api/extensions/v1beta1"
+	"k8s.io/apimachinery/pkg/api/errors"
 	k8sMeta "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/util/intstr"
+	"k8s.io/client-go/kubernetes"
 	"math/rand"
 	"net/http"
 	"time"
-	"fmt"
-	"k8s.io/client-go/kubernetes"
-	"k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/apimachinery/pkg/util/intstr"
+
+	istioConfigApi "github.com/dpacierpnik/istio-0.7-eds-issue/pkg/apis/config.istio.io/v1alpha2"
+	istioConfig "github.com/dpacierpnik/istio-0.7-eds-issue/pkg/clients/config.istio.io/clientset/versioned"
 )
 
 const (
-	testIdLength = 8
+	testIdLength   = 8
+	istioNamespace = "istio-system"
 )
 
 type HttpInterface interface {
@@ -24,22 +28,24 @@ type HttpInterface interface {
 }
 
 type TestScenario struct {
-	httpClient     *http.Client
-	k8sInterface   kubernetes.Interface
-	namespace      string
-	hostnameFormat string
-	retrySleep     time.Duration
-	maxRetries     int
+	httpClient           *http.Client
+	k8sInterface         kubernetes.Interface
+	istioConfigInterface istioConfig.Interface
+	namespace            string
+	hostnameFormat       string
+	retrySleep           time.Duration
+	maxRetries           int
 }
 
-func New(httpClient *http.Client, k8sInterface kubernetes.Interface, namespace string, hostnameFormat string, retrySleep time.Duration, maxRetries int) *TestScenario {
+func New(httpClient *http.Client, k8sInterface kubernetes.Interface, istioConfigInterface istioConfig.Interface, namespace string, hostnameFormat string, retrySleep time.Duration, maxRetries int) *TestScenario {
 	return &TestScenario{
-		httpClient:     httpClient,
-		k8sInterface:   k8sInterface,
-		namespace:      namespace,
-		hostnameFormat: hostnameFormat,
-		retrySleep:     retrySleep,
-		maxRetries:     maxRetries,
+		httpClient:           httpClient,
+		k8sInterface:         k8sInterface,
+		istioConfigInterface: istioConfigInterface,
+		namespace:            namespace,
+		hostnameFormat:       hostnameFormat,
+		retrySleep:           retrySleep,
+		maxRetries:           maxRetries,
 	}
 }
 
@@ -51,7 +57,7 @@ func (s *TestScenario) Run() {
 	failuresCounter := 0
 
 	// repeat foreaver
-	for ; true; {
+	for true {
 
 		testsCounter++
 		t := newTest(s, testsCounter)
@@ -76,6 +82,7 @@ type testCleanup struct {
 	deployment *k8sApps.Deployment
 	service    *k8sCore.Service
 	ingress    *k8sExts.Ingress
+	jwtRule    *istioConfigApi.Rule
 }
 
 func newTest(s *TestScenario, testNo int) *test {
@@ -104,6 +111,9 @@ func (t *test) run() error {
 	ingress := t.createIngressOrExit(service)
 	tc.ingress = ingress
 
+	jwtRule := t.createJwtRuleOrExit()
+	tc.jwtRule = jwtRule
+
 	err := t.callWithRetries(ingress)
 
 	log.Infof("Test '%s' failed: %v", t.testId, err)
@@ -112,6 +122,13 @@ func (t *test) run() error {
 }
 
 func (c *testCleanup) run() {
+
+	if c.jwtRule != nil {
+		delErr := c.test.scenario.istioConfigInterface.ConfigV1alpha2().Rules(istioNamespace).Delete(c.jwtRule.Name, &k8sMeta.DeleteOptions{})
+		if delErr != nil {
+			log.Warnf("Test '%s' - can not delete rule '%s'. Root cause: %+v", c.test.testId, c.jwtRule.Name, delErr)
+		}
+	}
 
 	if c.ingress != nil {
 		delErr := c.test.scenario.k8sInterface.ExtensionsV1beta1().Ingresses(c.test.scenario.namespace).Delete(c.ingress.Name, &k8sMeta.DeleteOptions{})
@@ -315,6 +332,50 @@ func (t *test) createIngressOrExit(service *k8sCore.Service) *k8sExts.Ingress {
 	return result
 }
 
+func (t *test) createJwtRuleOrExit() *istioConfigApi.Rule {
+
+	objectMetadata := k8sMeta.ObjectMeta{
+		Name:      "test-jwt-rule",
+		Namespace: "istio-system",
+	}
+
+	spec := &istioConfigApi.RuleSpec{
+		Match: fmt.Sprintf(`destination.service == "%s.%s.svc.cluster.local"`, fmt.Sprintf("sample-app-%s", t.testId), t.scenario.namespace),
+		Actions: []*istioConfigApi.Action{
+			{
+				Handler:   "handler.jwt",
+				Instances: []string{"jwt.auth.istio-system"},
+			},
+		},
+	}
+
+	rule := &istioConfigApi.Rule{
+		ObjectMeta: objectMetadata,
+		Spec:       spec,
+	}
+
+	result, createErr := t.scenario.istioConfigInterface.ConfigV1alpha2().Rules(istioNamespace).Create(rule)
+
+	if createErr != nil {
+
+		if errors.IsAlreadyExists(createErr) {
+
+			log.Debugf("Test '%s' - JWT rule already exists. Trying to get it...", t.testId)
+			tempResult, getErr := t.scenario.istioConfigInterface.ConfigV1alpha2().Rules(istioNamespace).Get(rule.Name, k8sMeta.GetOptions{})
+			if getErr != nil {
+				log.Fatalf("Error getting existing JWT rule. Root cause: %v", getErr)
+			} else {
+				result = tempResult
+			}
+		} else {
+			log.Fatalf("Error creating JWT rule. Root cause: %v", createErr)
+		}
+	}
+
+	log.Debugf("Test '%s' - JWT rule created.", t.testId)
+	return result
+}
+
 func (t *test) hostnameFor(testId string) string {
 	return fmt.Sprintf(t.scenario.hostnameFormat, testId)
 }
@@ -327,13 +388,13 @@ func (t *test) callWithRetries(ingress *k8sExts.Ingress) error {
 
 	response, err := t.withRetries(func() (*http.Response, error) {
 		return t.scenario.httpClient.Get(fmt.Sprintf("http://%s/headers", hostname))
-	}, httpNotOkPredicate)
+	}, httpForbiddenPredicate)
 
 	if err != nil {
 		return fmt.Errorf("can not call '%s'. Root cause: %v", hostname, err)
 	}
 
-	failed := httpNotOkPredicate(response)
+	failed := httpForbiddenPredicate(response)
 
 	if failed {
 		return fmt.Errorf("can not call '%s'. Response status: %s", hostname, response.Status)
@@ -378,6 +439,10 @@ func (t *test) withRetries(httpCall func() (*http.Response, error), shouldRetryP
 
 func httpNotOkPredicate(response *http.Response) bool {
 	return response.StatusCode < 200 || response.StatusCode > 299
+}
+
+func httpForbiddenPredicate(response *http.Response) bool {
+	return response.StatusCode != 403
 }
 
 func generateTestId(n int) string {

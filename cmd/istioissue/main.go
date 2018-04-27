@@ -2,20 +2,21 @@ package main
 
 import (
 	"context"
-	"os/exec"
-	"strings"
-	"net"
-	"net/http"
-	"time"
+	"crypto/tls"
+	istioConfig "github.com/dpacierpnik/istio-0.7-eds-issue/pkg/clients/config.istio.io/clientset/versioned"
+	"github.com/dpacierpnik/istio-0.7-eds-issue/pkg/istioissue/testscenario"
 	log "github.com/sirupsen/logrus"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
-	"crypto/tls"
-	"path/filepath"
+	"net"
+	"net/http"
 	"os"
+	"os/exec"
+	"path/filepath"
 	"regexp"
-	"github.com/dpacierpnik/istio-0.7-eds-issue/pkg/istioissue/testscenario"
+	"strings"
+	"time"
 )
 
 const (
@@ -33,10 +34,12 @@ func main() {
 
 	kubeConfig := defaultConfigOrExit()
 	k8sInterface := k8sInterfaceOrExit(kubeConfig)
+	istioConfigInterface := istioConfigInterfaceOrExit(kubeConfig)
 
 	ts := testscenario.New(
 		httpClient,
 		k8sInterface,
+		istioConfigInterface,
 		namespace,
 		hostnameFormat,
 		retrySleep,
@@ -117,4 +120,13 @@ func k8sInterfaceOrExit(kubeConfig *rest.Config) kubernetes.Interface {
 		log.Fatalf("can create k8s clientset. Root cause: %v", k8sErr)
 	}
 	return k8sInterface
+}
+
+func istioConfigInterfaceOrExit(kubeConfig *rest.Config) istioConfig.Interface {
+
+	istioConfigInterface, err := istioConfig.NewForConfig(kubeConfig)
+	if err != nil {
+		log.Fatalf("can create istioConfig clientset. Root cause: %v", err)
+	}
+	return istioConfigInterface
 }
