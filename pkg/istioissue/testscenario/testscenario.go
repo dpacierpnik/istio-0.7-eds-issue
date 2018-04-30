@@ -106,7 +106,11 @@ func (t *test) run() error {
 
 	err := t.callWithRetries(ingress)
 
-	log.Infof("Test '%s' failed: %v", t.testId, err)
+	if err == nil {
+		log.Infof("Test '%s' succeed", t.testId)
+	} else {
+		log.Infof("Test '%s' failed with: %v", t.testId, err)
+	}
 	log.Info("############################################################")
 	return err
 }
