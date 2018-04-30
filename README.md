@@ -1,11 +1,12 @@
-# Istio 0.7.1 issue with EDS - envoy of the app never knows about ingress
+# Istio 0.7.1 issue with EDS
 
 ## Summary
 
 ## Pre-requisites:
 
 - Minikube 0.25.0 or newer installed
-- Kubectl 1.7.3 or newer installed
+- Hyperkit driver
+- Kubectl 1.9 or newer installed
 - Golang 1.9 or newer installed
 
 ## How to run
@@ -28,7 +29,7 @@
 1. Run minikube (0.25.0 or later):
 
    ```bash
-   minikube start \
+   minikube start --vm-driver=hyperkit \
 	  --extra-config=controller-manager.ClusterSigningCertFile="/var/lib/localkube/certs/ca.crt" \
 	  --extra-config=controller-manager.ClusterSigningKeyFile="/var/lib/localkube/certs/ca.key" \
 	  --extra-config=apiserver.Admission.PluginNames=NamespaceLifecycle,LimitRanger,ServiceAccount,PersistentVolumeLabel,DefaultStorageClass,DefaultTolerationSeconds,MutatingAdmissionWebhook,ValidatingAdmissionWebhook,ResourceQuota \
@@ -40,12 +41,6 @@
 
    ```bash
    ./install-istio.sh
-   ```
-      
-1. Enable Istio sidecar injection for default namespaces:
-
-   ```bash
-   kubectl label namespace default istio-injection=enabled
    ```
       
 1. Run application with test scenario:
