@@ -1,6 +1,28 @@
-# Istio 0.7.1 issue with EDS
+# Istio 0.7.1 issues with Pilot
 
 ## Summary
+
+This project has been created to reproduce different issues with Istio Pilot, which behaves very unstable in our cluster. 
+
+This repository contains original Istio 0.7.1 with one adjustment - Ingress Controller service configuration has been modified - 
+*type* has been set to *NodePort* and *nodePort* has been set to *80*.
+
+Test has been implemented as simple Go application which runs forever, and executes very simple test scenario, 
+which consists of the following steps:
+
+1. Create *K8s pod* with httpbin application (using *K8s deployment*)
+
+1. Create *K8s service* for httpbin application
+
+1. Create *K8s ingress* for httpbin application
+
+1. Call httpbin application via *K8s ingress*. Because application may not be available immediately, 
+   retry this operation every 3 seconds until either expected response will be returned (http status: 200 OK), 
+   or max retries count will be exceeded (1000 attempts).
+   If application will not be available after 50 minutes (3 seconds of delay * 1000 attempts = 3000 seconds = 50 minutes), 
+   report warning, that the issue has been found.
+   
+1. When retries are finished, cleanup K8s resources (deployment, service and ingress), and repeat whole scenario again.
 
 ## Pre-requisites:
 
@@ -37,11 +59,19 @@
       --extra-config=apiserver.ServiceNodePortRange=79-36000
    ```
 
-1. Install Istio:
+1. Install Istio using appropriate installation script:
 
-   ```bash
-   ./install-istio.sh
-   ```
+   1. Istio with auth disabled (installed using istio.yaml):
+   
+      ```bash
+      ./install-istio.sh
+      ```
+
+   1. Istio with auth enabled (installed using istio-auth.yaml):
+   
+      ```bash
+      ./install-istio-auth.sh
+      ```
       
 1. Run application with test scenario:
 
