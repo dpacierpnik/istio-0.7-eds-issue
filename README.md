@@ -51,7 +51,7 @@ which consists of the following steps:
 1. Run minikube (0.25.0 or later):
 
    ```bash
-   minikube start --vm-driver=hyperkit \
+   minikube start --vm-driver=hyperkit --memory=4096 \
 	  --extra-config=controller-manager.ClusterSigningCertFile="/var/lib/localkube/certs/ca.crt" \
 	  --extra-config=controller-manager.ClusterSigningKeyFile="/var/lib/localkube/certs/ca.key" \
 	  --extra-config=apiserver.Admission.PluginNames=NamespaceLifecycle,LimitRanger,ServiceAccount,PersistentVolumeLabel,DefaultStorageClass,DefaultTolerationSeconds,MutatingAdmissionWebhook,ValidatingAdmissionWebhook,ResourceQuota \
