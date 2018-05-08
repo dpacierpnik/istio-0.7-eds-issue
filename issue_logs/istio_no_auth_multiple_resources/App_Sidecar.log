@@ -1,0 +1,251 @@
+2018-05-08T12:20:00.609477Z	info	Version root@c5207293dc14-docker.io/istio-0.7.1-62110d4f0373a7613e57b8a4d559ded9cb6a1cc8-Clean
+2018-05-08T12:20:00.609524Z	info	Proxy role: model.Proxy{Type:"sidecar", IPAddress:"172.17.0.27", ID:"sample-app-lgimuwvn-29-5867cb85b5-wlfp9.default", Domain:"default.svc.cluster.local"}
+2018-05-08T12:20:00.609531Z	info	Attempting to lookup address: istio-mixer.istio-system
+2018-05-08T12:20:00.611410Z	info	Addr resolved to: 10.109.206.19:9125
+2018-05-08T12:20:00.611464Z	info	Finished lookup of address: istio-mixer.istio-system
+2018-05-08T12:20:00.611878Z	info	Effective config: binaryPath: /usr/local/bin/envoy
+configPath: /etc/istio/proxy
+connectTimeout: 10.000s
+discoveryAddress: istio-pilot.istio-system:8080
+discoveryRefreshDelay: 1.000s
+drainDuration: 45.000s
+parentShutdownDuration: 60.000s
+proxyAdminPort: 15000
+serviceCluster: sample-app-sample-app-lgimuwvn-29
+statsdUdpAddress: 10.109.206.19:9125
+zipkinAddress: zipkin.istio-system:9411
+
+2018-05-08T12:20:00.611931Z	info	Monitored certs: []v1.CertSource{v1.CertSource{Directory:"/etc/certs/", Files:[]string{"cert-chain.pem", "key.pem", "root-cert.pem"}}}
+2018-05-08T12:20:00.612178Z	info	Starting proxy agent
+2018-05-08T12:20:00.612279Z	info	Received new config, resetting budget
+2018-05-08T12:20:00.612338Z	info	Reconciling configuration (budget 10)
+2018-05-08T12:20:00.612362Z	info	Epoch 0 starting
+2018-05-08T12:20:00.612917Z	info	Envoy command: [-c /etc/istio/proxy/envoy-rev0.json --restart-epoch 0 --drain-time-s 45 --parent-shutdown-time-s 60 --service-cluster sample-app-sample-app-lgimuwvn-29 --service-node sidecar~172.17.0.27~sample-app-lgimuwvn-29-5867cb85b5-wlfp9.default~default.svc.cluster.local --max-obj-name-len 189 -l info --v2-config-only]
+[2018-05-08 12:20:00.624][11][info][main] external/envoy/source/server/server.cc:178] initializing epoch 0 (hot restart version=9.200.16384.256.options=capacity=16384, num_slots=8209 hash=228984379728933363)
+[2018-05-08 12:20:00.626][11][info][config] external/envoy/source/server/configuration_impl.cc:52] loading 0 listener(s)
+[2018-05-08 12:20:00.626][11][info][config] external/envoy/source/server/configuration_impl.cc:92] loading tracing configuration
+[2018-05-08 12:20:00.626][11][info][config] external/envoy/source/server/configuration_impl.cc:101]   loading tracing driver: envoy.zipkin
+[2018-05-08 12:20:00.626][11][info][config] external/envoy/source/server/configuration_impl.cc:119] loading stats sink configuration
+[2018-05-08 12:20:00.627][11][info][main] external/envoy/source/server/server.cc:353] starting main dispatch loop
+[2018-05-08 12:20:00.628][11][info][upstream] external/envoy/source/common/upstream/cluster_manager_impl.cc:127] cm init: initializing cds
+[2018-05-08 12:20:00.695][11][info][upstream] external/envoy/source/common/upstream/cluster_manager_impl.cc:382] add/update cluster out.istio-ingress.istio-system.svc.cluster.local|http during init
+[2018-05-08 12:20:00.697][11][info][upstream] external/envoy/source/common/upstream/cluster_manager_impl.cc:382] add/update cluster out.istio-ingress.istio-system.svc.cluster.local|https during init
+[2018-05-08 12:20:00.698][11][info][upstream] external/envoy/source/common/upstream/cluster_manager_impl.cc:382] add/update cluster out.istio-mixer.istio-system.svc.cluster.local|configapi during init
+[2018-05-08 12:20:00.699][11][info][upstream] external/envoy/source/common/upstream/cluster_manager_impl.cc:382] add/update cluster out.istio-mixer.istio-system.svc.cluster.local|http-monitoring during init
+[2018-05-08 12:20:00.702][11][info][upstream] external/envoy/source/common/upstream/cluster_manager_impl.cc:382] add/update cluster out.istio-mixer.istio-system.svc.cluster.local|prometheus during init
+[2018-05-08 12:20:00.704][11][info][upstream] external/envoy/source/common/upstream/cluster_manager_impl.cc:382] add/update cluster out.istio-mixer.istio-system.svc.cluster.local|statsd-prom during init
+[2018-05-08 12:20:00.705][11][info][upstream] external/envoy/source/common/upstream/cluster_manager_impl.cc:382] add/update cluster out.istio-mixer.istio-system.svc.cluster.local|tcp-mtls during init
+[2018-05-08 12:20:00.707][11][info][upstream] external/envoy/source/common/upstream/cluster_manager_impl.cc:382] add/update cluster out.istio-mixer.istio-system.svc.cluster.local|tcp-plain during init
+[2018-05-08 12:20:00.708][11][info][upstream] external/envoy/source/common/upstream/cluster_manager_impl.cc:382] add/update cluster out.istio-pilot.istio-system.svc.cluster.local|admission-webhook during init
+[2018-05-08 12:20:00.709][11][info][upstream] external/envoy/source/common/upstream/cluster_manager_impl.cc:382] add/update cluster out.istio-pilot.istio-system.svc.cluster.local|discovery during init
+[2018-05-08 12:20:00.709][11][info][upstream] external/envoy/source/common/upstream/cluster_manager_impl.cc:382] add/update cluster out.istio-pilot.istio-system.svc.cluster.local|grpc-discovery during init
+[2018-05-08 12:20:00.709][11][info][upstream] external/envoy/source/common/upstream/cluster_manager_impl.cc:382] add/update cluster out.istio-pilot.istio-system.svc.cluster.local|http-discovery during init
+[2018-05-08 12:20:00.710][11][info][upstream] external/envoy/source/common/upstream/cluster_manager_impl.cc:382] add/update cluster out.istio-pilot.istio-system.svc.cluster.local|http-legacy-discovery during init
+[2018-05-08 12:20:00.710][11][info][upstream] external/envoy/source/common/upstream/cluster_manager_impl.cc:382] add/update cluster out.istio-pilot.istio-system.svc.cluster.local|http-monitoring during init
+[2018-05-08 12:20:00.712][11][info][upstream] external/envoy/source/common/upstream/cluster_manager_impl.cc:382] add/update cluster out.istio-pilot.istio-system.svc.cluster.local|https-discovery during init
+[2018-05-08 12:20:00.712][11][info][upstream] external/envoy/source/common/upstream/cluster_manager_impl.cc:382] add/update cluster out.istio-sidecar-injector.istio-system.svc.cluster.local|https-webhook during init
+[2018-05-08 12:20:00.712][11][info][upstream] external/envoy/source/common/upstream/cluster_manager_impl.cc:382] add/update cluster out.kube-dns.kube-system.svc.cluster.local|dns-tcp during init
+[2018-05-08 12:20:00.712][11][info][upstream] external/envoy/source/common/upstream/cluster_manager_impl.cc:382] add/update cluster out.kubernetes-dashboard.kube-system.svc.cluster.local during init
+[2018-05-08 12:20:00.712][11][info][upstream] external/envoy/source/common/upstream/cluster_manager_impl.cc:382] add/update cluster out.kubernetes.default.svc.cluster.local|https during init
+[2018-05-08 12:20:00.712][11][info][upstream] external/envoy/source/common/upstream/cluster_manager_impl.cc:382] add/update cluster out.sample-app-lgimuwvn-0.default.svc.cluster.local|http during init
+[2018-05-08 12:20:00.712][11][info][upstream] external/envoy/source/common/upstream/cluster_manager_impl.cc:382] add/update cluster out.sample-app-lgimuwvn-1.default.svc.cluster.local|http during init
+[2018-05-08 12:20:00.712][11][info][upstream] external/envoy/source/common/upstream/cluster_manager_impl.cc:382] add/update cluster out.sample-app-lgimuwvn-10.default.svc.cluster.local|http during init
+[2018-05-08 12:20:00.713][11][info][upstream] external/envoy/source/common/upstream/cluster_manager_impl.cc:382] add/update cluster out.sample-app-lgimuwvn-11.default.svc.cluster.local|http during init
+[2018-05-08 12:20:00.714][11][info][upstream] external/envoy/source/common/upstream/cluster_manager_impl.cc:382] add/update cluster out.sample-app-lgimuwvn-12.default.svc.cluster.local|http during init
+[2018-05-08 12:20:00.715][11][info][upstream] external/envoy/source/common/upstream/cluster_manager_impl.cc:382] add/update cluster out.sample-app-lgimuwvn-13.default.svc.cluster.local|http during init
+[2018-05-08 12:20:00.717][11][info][upstream] external/envoy/source/common/upstream/cluster_manager_impl.cc:382] add/update cluster out.sample-app-lgimuwvn-14.default.svc.cluster.local|http during init
+[2018-05-08 12:20:00.717][11][info][upstream] external/envoy/source/common/upstream/cluster_manager_impl.cc:382] add/update cluster out.sample-app-lgimuwvn-15.default.svc.cluster.local|http during init
+[2018-05-08 12:20:00.717][11][info][upstream] external/envoy/source/common/upstream/cluster_manager_impl.cc:382] add/update cluster out.sample-app-lgimuwvn-16.default.svc.cluster.local|http during init
+[2018-05-08 12:20:00.717][11][info][upstream] external/envoy/source/common/upstream/cluster_manager_impl.cc:382] add/update cluster out.sample-app-lgimuwvn-17.default.svc.cluster.local|http during init
+[2018-05-08 12:20:00.717][11][info][upstream] external/envoy/source/common/upstream/cluster_manager_impl.cc:382] add/update cluster out.sample-app-lgimuwvn-18.default.svc.cluster.local|http during init
+[2018-05-08 12:20:00.717][11][info][upstream] external/envoy/source/common/upstream/cluster_manager_impl.cc:382] add/update cluster out.sample-app-lgimuwvn-19.default.svc.cluster.local|http during init
+[2018-05-08 12:20:00.718][11][info][upstream] external/envoy/source/common/upstream/cluster_manager_impl.cc:382] add/update cluster out.sample-app-lgimuwvn-2.default.svc.cluster.local|http during init
+[2018-05-08 12:20:00.718][11][info][upstream] external/envoy/source/common/upstream/cluster_manager_impl.cc:382] add/update cluster out.sample-app-lgimuwvn-20.default.svc.cluster.local|http during init
+[2018-05-08 12:20:00.718][11][info][upstream] external/envoy/source/common/upstream/cluster_manager_impl.cc:382] add/update cluster out.sample-app-lgimuwvn-21.default.svc.cluster.local|http during init
+[2018-05-08 12:20:00.718][11][info][upstream] external/envoy/source/common/upstream/cluster_manager_impl.cc:382] add/update cluster out.sample-app-lgimuwvn-22.default.svc.cluster.local|http during init
+[2018-05-08 12:20:00.718][11][info][upstream] external/envoy/source/common/upstream/cluster_manager_impl.cc:382] add/update cluster out.sample-app-lgimuwvn-23.default.svc.cluster.local|http during init
+[2018-05-08 12:20:00.718][11][info][upstream] external/envoy/source/common/upstream/cluster_manager_impl.cc:382] add/update cluster out.sample-app-lgimuwvn-24.default.svc.cluster.local|http during init
+[2018-05-08 12:20:00.718][11][info][upstream] external/envoy/source/common/upstream/cluster_manager_impl.cc:382] add/update cluster out.sample-app-lgimuwvn-25.default.svc.cluster.local|http during init
+[2018-05-08 12:20:00.721][11][info][upstream] external/envoy/source/common/upstream/cluster_manager_impl.cc:382] add/update cluster out.sample-app-lgimuwvn-26.default.svc.cluster.local|http during init
+[2018-05-08 12:20:00.721][11][info][upstream] external/envoy/source/common/upstream/cluster_manager_impl.cc:382] add/update cluster out.sample-app-lgimuwvn-27.default.svc.cluster.local|http during init
+[2018-05-08 12:20:00.721][11][info][upstream] external/envoy/source/common/upstream/cluster_manager_impl.cc:382] add/update cluster out.sample-app-lgimuwvn-28.default.svc.cluster.local|http during init
+[2018-05-08 12:20:00.721][11][info][upstream] external/envoy/source/common/upstream/cluster_manager_impl.cc:382] add/update cluster out.sample-app-lgimuwvn-29.default.svc.cluster.local|http during init
+[2018-05-08 12:20:00.721][11][info][upstream] external/envoy/source/common/upstream/cluster_manager_impl.cc:382] add/update cluster out.sample-app-lgimuwvn-3.default.svc.cluster.local|http during init
+[2018-05-08 12:20:00.721][11][info][upstream] external/envoy/source/common/upstream/cluster_manager_impl.cc:382] add/update cluster out.sample-app-lgimuwvn-4.default.svc.cluster.local|http during init
+[2018-05-08 12:20:00.724][11][info][upstream] external/envoy/source/common/upstream/cluster_manager_impl.cc:382] add/update cluster out.sample-app-lgimuwvn-5.default.svc.cluster.local|http during init
+[2018-05-08 12:20:00.724][11][info][upstream] external/envoy/source/common/upstream/cluster_manager_impl.cc:382] add/update cluster out.sample-app-lgimuwvn-6.default.svc.cluster.local|http during init
+[2018-05-08 12:20:00.724][11][info][upstream] external/envoy/source/common/upstream/cluster_manager_impl.cc:382] add/update cluster out.sample-app-lgimuwvn-7.default.svc.cluster.local|http during init
+[2018-05-08 12:20:00.724][11][info][upstream] external/envoy/source/common/upstream/cluster_manager_impl.cc:382] add/update cluster out.sample-app-lgimuwvn-8.default.svc.cluster.local|http during init
+[2018-05-08 12:20:00.725][11][info][upstream] external/envoy/source/common/upstream/cluster_manager_impl.cc:382] add/update cluster out.sample-app-lgimuwvn-9.default.svc.cluster.local|http during init
+[2018-05-08 12:20:00.725][11][info][upstream] external/envoy/source/common/upstream/cluster_manager_impl.cc:382] add/update cluster mixer_check_server during init
+[2018-05-08 12:20:00.726][11][info][upstream] external/envoy/source/common/upstream/cluster_manager_impl.cc:382] add/update cluster mixer_report_server during init
+[2018-05-08 12:20:00.727][11][info][upstream] external/envoy/source/common/upstream/cluster_manager_impl.cc:108] cm init: initializing secondary clusters
+[2018-05-08 12:20:00.739][11][info][upstream] external/envoy/source/common/upstream/cluster_manager_impl.cc:131] cm init: all clusters initialized
+[2018-05-08 12:20:00.739][11][info][main] external/envoy/source/server/server.cc:337] all clusters initialized. initializing init manager
+[2018-05-08 12:20:00.759][11][info][upstream] external/envoy/source/server/lds_api.cc:60] lds: add/update listener 'virtual'
+[2018-05-08 12:20:00.761][11][info][config] src/envoy/utils/config.cc:50] v2 mixer client config: transport {
+  check_cluster: "mixer_check_server"
+  report_cluster: "mixer_report_server"
+}
+mixer_attributes {
+}
+forward_attributes {
+  attributes {
+    key: "source.ip"
+    value {
+      bytes_value: "\000\000\000\000\000\000\000\000\000\000\377\377\254\021\000\033"
+    }
+  }
+  attributes {
+    key: "source.uid"
+    value {
+      string_value: "kubernetes://sample-app-lgimuwvn-29-5867cb85b5-wlfp9.default"
+    }
+  }
+}
+
+[2018-05-08 12:20:00.761][11][info][upstream] external/envoy/source/server/lds_api.cc:60] lds: add/update listener 'http_0.0.0.0_15007'
+[2018-05-08 12:20:00.762][11][info][config] src/envoy/utils/config.cc:50] v2 mixer client config: transport {
+  check_cluster: "mixer_check_server"
+  report_cluster: "mixer_report_server"
+}
+mixer_attributes {
+}
+forward_attributes {
+  attributes {
+    key: "source.ip"
+    value {
+      bytes_value: "\000\000\000\000\000\000\000\000\000\000\377\377\254\021\000\033"
+    }
+  }
+  attributes {
+    key: "source.uid"
+    value {
+      string_value: "kubernetes://sample-app-lgimuwvn-29-5867cb85b5-wlfp9.default"
+    }
+  }
+}
+
+[2018-05-08 12:20:00.762][11][info][upstream] external/envoy/source/server/lds_api.cc:60] lds: add/update listener 'http_0.0.0.0_15010'
+[2018-05-08 12:20:00.763][11][info][config] src/envoy/utils/config.cc:50] v2 mixer client config: transport {
+  check_cluster: "mixer_check_server"
+  report_cluster: "mixer_report_server"
+}
+mixer_attributes {
+}
+forward_attributes {
+  attributes {
+    key: "source.ip"
+    value {
+      bytes_value: "\000\000\000\000\000\000\000\000\000\000\377\377\254\021\000\033"
+    }
+  }
+  attributes {
+    key: "source.uid"
+    value {
+      string_value: "kubernetes://sample-app-lgimuwvn-29-5867cb85b5-wlfp9.default"
+    }
+  }
+}
+
+[2018-05-08 12:20:00.764][11][info][upstream] external/envoy/source/server/lds_api.cc:60] lds: add/update listener 'http_0.0.0.0_80'
+[2018-05-08 12:20:00.764][11][info][config] src/envoy/utils/config.cc:50] v2 mixer client config: transport {
+  check_cluster: "mixer_check_server"
+  report_cluster: "mixer_report_server"
+}
+mixer_attributes {
+}
+forward_attributes {
+  attributes {
+    key: "source.ip"
+    value {
+      bytes_value: "\000\000\000\000\000\000\000\000\000\000\377\377\254\021\000\033"
+    }
+  }
+  attributes {
+    key: "source.uid"
+    value {
+      string_value: "kubernetes://sample-app-lgimuwvn-29-5867cb85b5-wlfp9.default"
+    }
+  }
+}
+
+[2018-05-08 12:20:00.765][11][info][upstream] external/envoy/source/server/lds_api.cc:60] lds: add/update listener 'http_0.0.0.0_8080'
+[2018-05-08 12:20:00.765][11][info][config] src/envoy/utils/config.cc:50] v2 mixer client config: transport {
+  check_cluster: "mixer_check_server"
+  report_cluster: "mixer_report_server"
+}
+mixer_attributes {
+}
+forward_attributes {
+  attributes {
+    key: "source.ip"
+    value {
+      bytes_value: "\000\000\000\000\000\000\000\000\000\000\377\377\254\021\000\033"
+    }
+  }
+  attributes {
+    key: "source.uid"
+    value {
+      string_value: "kubernetes://sample-app-lgimuwvn-29-5867cb85b5-wlfp9.default"
+    }
+  }
+}
+
+[2018-05-08 12:20:00.766][11][info][upstream] external/envoy/source/server/lds_api.cc:60] lds: add/update listener 'http_0.0.0.0_8888'
+[2018-05-08 12:20:00.767][11][info][config] src/envoy/utils/config.cc:50] v2 mixer client config: transport {
+  check_cluster: "mixer_check_server"
+  report_cluster: "mixer_report_server"
+}
+mixer_attributes {
+}
+forward_attributes {
+  attributes {
+    key: "source.ip"
+    value {
+      bytes_value: "\000\000\000\000\000\000\000\000\000\000\377\377\254\021\000\033"
+    }
+  }
+  attributes {
+    key: "source.uid"
+    value {
+      string_value: "kubernetes://sample-app-lgimuwvn-29-5867cb85b5-wlfp9.default"
+    }
+  }
+}
+
+[2018-05-08 12:20:00.767][11][info][upstream] external/envoy/source/server/lds_api.cc:60] lds: add/update listener 'http_0.0.0.0_9093'
+[2018-05-08 12:20:00.767][11][info][upstream] external/envoy/source/server/lds_api.cc:60] lds: add/update listener 'tcp_10.104.165.183_443'
+[2018-05-08 12:20:00.767][11][info][upstream] external/envoy/source/server/lds_api.cc:60] lds: add/update listener 'tcp_10.108.109.171_443'
+[2018-05-08 12:20:00.767][11][info][upstream] external/envoy/source/server/lds_api.cc:60] lds: add/update listener 'tcp_10.109.206.19_15004'
+[2018-05-08 12:20:00.767][11][info][upstream] external/envoy/source/server/lds_api.cc:60] lds: add/update listener 'tcp_10.109.206.19_42422'
+[2018-05-08 12:20:00.768][11][info][upstream] external/envoy/source/server/lds_api.cc:60] lds: add/update listener 'tcp_10.109.206.19_9091'
+[2018-05-08 12:20:00.768][11][info][upstream] external/envoy/source/server/lds_api.cc:60] lds: add/update listener 'tcp_10.109.206.19_9094'
+[2018-05-08 12:20:00.768][11][info][upstream] external/envoy/source/server/lds_api.cc:60] lds: add/update listener 'tcp_10.109.206.19_9102'
+[2018-05-08 12:20:00.768][11][info][upstream] external/envoy/source/server/lds_api.cc:60] lds: add/update listener 'tcp_10.96.0.10_53'
+[2018-05-08 12:20:00.768][11][info][upstream] external/envoy/source/server/lds_api.cc:60] lds: add/update listener 'tcp_10.96.0.1_443'
+[2018-05-08 12:20:00.768][11][info][upstream] external/envoy/source/server/lds_api.cc:60] lds: add/update listener 'tcp_10.97.58.151_15003'
+[2018-05-08 12:20:00.769][11][info][upstream] external/envoy/source/server/lds_api.cc:60] lds: add/update listener 'tcp_10.97.58.151_15005'
+[2018-05-08 12:20:00.769][11][info][upstream] external/envoy/source/server/lds_api.cc:60] lds: add/update listener 'tcp_10.97.58.151_443'
+[2018-05-08 12:20:00.769][11][info][upstream] external/envoy/source/server/lds_api.cc:60] lds: add/update listener 'tcp_10.99.197.127_80'
+[2018-05-08 12:20:00.778][11][info][config] external/envoy/source/server/listener_manager_impl.cc:583] all dependencies initialized. starting workers
+2018-05-08T12:20:30.615942Z	info	Received 404 status from pilot when retrieving availability zone: AvailabilityZone couldn't find the given cluster node
+2018-05-08T12:21:00.616914Z	info	Proxy availability zone: 
+[2018-05-08 12:21:00.777][11][info][main] external/envoy/source/server/drain_manager_impl.cc:63] shutting down parent after drain
+2018-05-08T12:21:30.617857Z	info	Proxy availability zone: 
+2018-05-08T12:22:00.619696Z	info	Proxy availability zone: 
+2018-05-08T12:22:30.621362Z	info	Proxy availability zone: 
+2018-05-08T12:23:00.623092Z	info	Proxy availability zone: 
+2018-05-08T12:23:30.624806Z	info	Proxy availability zone: 
+2018-05-08T12:24:00.629651Z	info	Proxy availability zone: 
+2018-05-08T12:24:30.630755Z	info	Proxy availability zone: 
+[2018-05-08 12:24:39.086][11][info][upstream] external/envoy/source/server/lds_subscription.cc:70] lds: fetch failure: network error
+[2018-05-08 12:24:41.994][11][info][upstream] external/envoy/source/server/lds_subscription.cc:70] lds: fetch failure: network error
+2018-05-08T12:25:00.678367Z	info	Proxy availability zone: 
+2018-05-08T12:25:32.308169Z	info	Proxy availability zone: 
+2018-05-08T12:25:32.308298Z	info	Availability zone not set, proxy will default to not using zone aware routing.
+[2018-05-08T12:26:11.613Z] "GET / HTTP/1.1" 200 - 0 4164 0 - "172.17.0.27" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.13; rv:59.0) Gecko/20100101 Firefox/59.0" "-" "localhost:15000" "-"
+[2018-05-08T12:26:11.688Z] "GET /favicon.ico HTTP/1.1" 404 - 0 741 0 - "172.17.0.27" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.13; rv:59.0) Gecko/20100101 Firefox/59.0" "-" "localhost:15000" "-"
+[2018-05-08T12:26:11.710Z] "GET /favicon.ico HTTP/1.1" 404 - 0 741 0 - "172.17.0.27" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.13; rv:59.0) Gecko/20100101 Firefox/59.0" "-" "localhost:15000" "-"
+[2018-05-08T12:26:17.554Z] "GET /routes HTTP/1.1" 200 - 0 32019 0 - "172.17.0.27" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.13; rv:59.0) Gecko/20100101 Firefox/59.0" "-" "localhost:15000" "-"
+[2018-05-08T13:02:03.412Z] "GET /routes HTTP/1.1" 200 - 0 32019 1 - "172.17.0.27" "curl/7.54.0" "-" "localhost:15000" "-"

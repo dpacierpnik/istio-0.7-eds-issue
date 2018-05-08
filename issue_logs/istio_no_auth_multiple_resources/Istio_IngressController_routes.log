@@ -1,0 +1,20 @@
+[
+{
+"version_info": "hash_0bd4282834dfa056",
+"route_config_name": "80",
+"config_source": {
+ "api_config_source": {
+  "cluster_names": [
+   "rds"
+  ],
+  "refresh_delay": "1s"
+ }
+}
+,
+"route_table_dump": {
+ "name": "80",
+ "validate_clusters": true
+}
+
+}
+]

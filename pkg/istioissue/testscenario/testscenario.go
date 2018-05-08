@@ -13,143 +13,164 @@ import (
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/util/intstr"
+	"strconv"
 )
 
 const (
-	testIdLength = 8
+	scenarioIdLength = 8
 )
 
-type HttpInterface interface {
-	Get(url string) (resp *http.Response, err error)
+type Config struct {
+	Namespace      string
+	HostnameFormat string
+	RetryDelay     time.Duration
+	MaxRetries     int
+	ResourcesCount int
+	OperationDelay time.Duration
 }
 
-type TestScenario struct {
-	httpClient     *http.Client
-	k8sInterface   kubernetes.Interface
-	namespace      string
-	hostnameFormat string
-	retrySleep     time.Duration
-	maxRetries     int
-}
-
-func New(httpClient *http.Client, k8sInterface kubernetes.Interface, namespace string, hostnameFormat string, retrySleep time.Duration, maxRetries int) *TestScenario {
-	return &TestScenario{
-		httpClient:     httpClient,
-		k8sInterface:   k8sInterface,
-		namespace:      namespace,
-		hostnameFormat: hostnameFormat,
-		retrySleep:     retrySleep,
-		maxRetries:     maxRetries,
-	}
-}
-
-func (s *TestScenario) Run() {
+func Run(httpClient *http.Client, k8sInterface kubernetes.Interface, config *Config) {
 
 	log.SetLevel(log.InfoLevel)
 
-	testsCounter := 0
-	failuresCounter := 0
+	scenarioNo := 0
+	failureNo := 0
 
 	// repeat foreaver
 	for ; true; {
 
-		testsCounter++
-		t := newTest(s, testsCounter)
+		scenarioNo++
+		s := newScenario(httpClient, k8sInterface, config, scenarioNo)
 
-		err := t.run()
+		err := s.run()
 
 		if err != nil {
-			failuresCounter++
-			log.Warnf("### Found issue! (failures count: %d / %d)", failuresCounter, testsCounter)
+			failureNo++
+			log.Warnf("### Found issue! (failures count: %d / %d)", failureNo, scenarioNo)
 		}
 	}
 }
 
-type test struct {
-	testNo   int
-	testId   string
-	scenario *TestScenario
+type scenario struct {
+	httpClient   *http.Client
+	k8sInterface kubernetes.Interface
+	config       *Config
+	no           int
+	id           string
 }
 
-type testCleanup struct {
-	test       *test
-	deployment *k8sApps.Deployment
-	service    *k8sCore.Service
-	ingress    *k8sExts.Ingress
-}
+func newScenario(httpClient *http.Client, k8sInterface kubernetes.Interface, config *Config, scenarioNo int) *scenario {
 
-func newTest(s *TestScenario, testNo int) *test {
+	scenarioId := generateId(scenarioIdLength)
 
-	testId := generateTestId(testIdLength)
-
-	return &test{
-		testNo:   testNo,
-		testId:   testId,
-		scenario: s,
+	return &scenario{
+		httpClient:   httpClient,
+		k8sInterface: k8sInterface,
+		config:       config,
+		no:           scenarioNo,
+		id:           scenarioId,
 	}
 }
 
-func (t *test) run() error {
+func (s *scenario) run() error {
 
-	log.Infof("[%d] Running test: '%s'", t.testNo, t.testId)
-	tc := testCleanup{test: t}
+	log.Infof("[%d] Running scenario: '%s'", s.no, s.id)
+	tc := newCleanup(s, s.config.ResourcesCount)
 	defer tc.run()
 
-	deployment := t.createDeploymentOrExit()
-	tc.deployment = deployment
+	var lastIngress *k8sExts.Ingress
 
-	service := t.createServiceOrExit(deployment)
-	tc.service = service
+	for i := 0; i < s.config.ResourcesCount; i++ {
 
-	ingress := t.createIngressOrExit(service)
-	tc.ingress = ingress
+		resourceId := fmt.Sprintf("sample-app-%s-%d", s.id, i)
 
-	err := t.callWithRetries(ingress)
+		log.Infof("Scenario '%s' - creating resources: '%s'", s.id, resourceId)
+
+		deployment := s.createDeploymentOrExit(resourceId)
+		tc.deployments[i] = deployment
+
+		time.Sleep(s.config.OperationDelay)
+
+		service := s.createServiceOrExit(deployment, resourceId)
+		tc.services[i] = service
+
+		time.Sleep(s.config.OperationDelay)
+
+		ingress := s.createIngressOrExit(service, resourceId)
+		tc.ingresses[i] = ingress
+
+		time.Sleep(s.config.OperationDelay)
+
+		lastIngress = ingress
+	}
+
+	err := s.callWithRetries(lastIngress)
 
 	if err == nil {
-		log.Infof("Test '%s' succeed", t.testId)
+		log.Infof("Scenario '%s' succeed", s.id)
 	} else {
-		log.Infof("Test '%s' failed with: %v", t.testId, err)
+		log.Infof("Scenario '%s' failed with: %v", s.id, err)
 	}
 	log.Info("############################################################")
 	return err
 }
 
-func (c *testCleanup) run() {
+type scenarioCleanup struct {
+	scenario    *scenario
+	deployments []*k8sApps.Deployment
+	services    []*k8sCore.Service
+	ingresses   []*k8sExts.Ingress
+}
 
-	if c.ingress != nil {
-		delErr := c.test.scenario.k8sInterface.ExtensionsV1beta1().Ingresses(c.test.scenario.namespace).Delete(c.ingress.Name, &k8sMeta.DeleteOptions{})
+func newCleanup(scenario *scenario, resourcesCount int) *scenarioCleanup {
+
+	tc := &scenarioCleanup{
+		scenario: scenario,
+	}
+	tc.deployments = make([]*k8sApps.Deployment, resourcesCount)
+	tc.services = make([]*k8sCore.Service, resourcesCount)
+	tc.ingresses = make([]*k8sExts.Ingress, resourcesCount)
+	return tc
+}
+
+func (c *scenarioCleanup) run() {
+
+	for _, ingress := range c.ingresses {
+		delErr := c.scenario.k8sInterface.ExtensionsV1beta1().Ingresses(c.scenario.config.Namespace).Delete(ingress.Name, &k8sMeta.DeleteOptions{})
 		if delErr != nil {
-			log.Warnf("Test '%s' - can not delete ingress '%s'. Root cause: %+v", c.test.testId, c.ingress.Name, delErr)
+			log.Warnf("Scenario '%s' - can not delete ingress '%s'. Root cause: %+v", c.scenario.id, ingress.Name, delErr)
 		}
+		time.Sleep(c.scenario.config.OperationDelay)
 	}
 
-	if c.service != nil {
-		delErr := c.test.scenario.k8sInterface.CoreV1().Services(c.test.scenario.namespace).Delete(c.service.Name, &k8sMeta.DeleteOptions{})
+	for _, service := range c.services {
+		delErr := c.scenario.k8sInterface.CoreV1().Services(c.scenario.config.Namespace).Delete(service.Name, &k8sMeta.DeleteOptions{})
 		if delErr != nil {
-			log.Warnf("Test '%s' - can not delete service '%s'. Root cause: %+v", c.test.testId, c.service.Name, delErr)
+			log.Warnf("Scenario '%s' - can not delete service '%s'. Root cause: %+v", c.scenario.id, service.Name, delErr)
 		}
+		time.Sleep(c.scenario.config.OperationDelay)
 	}
 
-	if c.deployment != nil {
-		delErr := c.test.scenario.k8sInterface.AppsV1().Deployments(c.test.scenario.namespace).Delete(c.deployment.Name, &k8sMeta.DeleteOptions{})
+	for _, deployment := range c.deployments {
+		delErr := c.scenario.k8sInterface.AppsV1().Deployments(c.scenario.config.Namespace).Delete(deployment.Name, &k8sMeta.DeleteOptions{})
 		if delErr != nil {
-			log.Warnf("Test '%s' - can not delete deployment '%s'. Root cause: %+v", c.test.testId, c.deployment.Name, delErr)
+			log.Warnf("Scenario '%s' - can not delete deployment '%s'. Root cause: %+v", c.scenario.id, deployment.Name, delErr)
 		}
+		time.Sleep(c.scenario.config.OperationDelay)
 	}
 }
 
-func (t *test) createDeploymentOrExit() *k8sApps.Deployment {
+func (s *scenario) createDeploymentOrExit(resourceId string) *k8sApps.Deployment {
 
-	labels := stdLabels(t.testId)
+	labels := s.stdLabels(resourceId)
 
 	podAnnotations := make(map[string]string)
 	podAnnotations["sidecar.istio.io/inject"] = "true"
 
 	deployment := &k8sApps.Deployment{
 		ObjectMeta: k8sMeta.ObjectMeta{
-			Name:      fmt.Sprintf("sample-app-%s", t.testId),
-			Namespace: t.scenario.namespace,
+			Name:      resourceId,
+			Namespace: s.config.Namespace,
 			Labels:    labels,
 		},
 		Spec: k8sApps.DeploymentSpec{
@@ -164,7 +185,7 @@ func (t *test) createDeploymentOrExit() *k8sApps.Deployment {
 				Spec: k8sCore.PodSpec{
 					Containers: []k8sCore.Container{
 						{
-							Name:            fmt.Sprintf("sample-app-cont-%s", t.testId),
+							Name:            "httpbin",
 							Image:           "docker.io/citizenstig/httpbin",
 							ImagePullPolicy: "IfNotPresent",
 							Ports: []k8sCore.ContainerPort{
@@ -185,32 +206,32 @@ func (t *test) createDeploymentOrExit() *k8sApps.Deployment {
 		},
 	}
 
-	log.Debugf("Test '%s' - creating deployment: %+v", t.testId, deployment)
+	log.Debugf("Scenario '%s' - creating deployment: %+v", s.id, deployment)
 
-	result, createErr := t.scenario.k8sInterface.AppsV1().Deployments(t.scenario.namespace).Create(deployment)
+	result, createErr := s.k8sInterface.AppsV1().Deployments(s.config.Namespace).Create(deployment)
 	if createErr != nil {
 
 		if errors.IsAlreadyExists(createErr) {
 
-			log.Debugf("Test '%s' - deployment already exists. Trying to get it...", t.testId)
-			tempResult, getErr := t.scenario.k8sInterface.AppsV1().Deployments(t.scenario.namespace).Get(deployment.GetName(), k8sMeta.GetOptions{})
+			log.Debugf("Scenario '%s' - deployment already exists. Trying to get is...", s.id)
+			tempResult, getErr := s.k8sInterface.AppsV1().Deployments(s.config.Namespace).Get(deployment.GetName(), k8sMeta.GetOptions{})
 			if getErr != nil {
-				log.Fatalf("Error getting existing deployment. Root cause: %v", getErr)
+				log.Fatalf("Error getting existing deploymens. Root cause: %v", getErr)
 			} else {
 				result = tempResult
 			}
 		} else {
-			log.Fatalf("Error creating deployment. Root cause: %v", createErr)
+			log.Fatalf("Error creating deploymens. Root cause: %v", createErr)
 		}
 	}
 
-	log.Debugf("Test '%s' - deployment created", t.testId)
+	log.Debugf("Scenario '%s' - deployment created", s.id)
 	return result
 }
 
-func (t *test) createServiceOrExit(deployment *k8sApps.Deployment) *k8sCore.Service {
+func (s *scenario) createServiceOrExit(deployment *k8sApps.Deployment, resourceId string) *k8sCore.Service {
 
-	labels := stdLabels(t.testId)
+	labels := s.stdLabels(resourceId)
 
 	podTmpl := deployment.Spec.Template
 
@@ -219,8 +240,8 @@ func (t *test) createServiceOrExit(deployment *k8sApps.Deployment) *k8sCore.Serv
 
 	svc := &k8sCore.Service{
 		ObjectMeta: k8sMeta.ObjectMeta{
-			Name:      fmt.Sprintf("sample-app-%s", t.testId),
-			Namespace: t.scenario.namespace,
+			Name:      resourceId,
+			Namespace: s.config.Namespace,
 			Labels:    labels,
 		},
 		Spec: k8sCore.ServiceSpec{
@@ -236,15 +257,15 @@ func (t *test) createServiceOrExit(deployment *k8sApps.Deployment) *k8sCore.Serv
 		},
 	}
 
-	log.Debugf("Test '%s' - creating service: %+v", t.testId, svc)
+	log.Debugf("Scenario '%s' - creating service: %+v", s.id, svc)
 
-	result, createErr := t.scenario.k8sInterface.CoreV1().Services(t.scenario.namespace).Create(svc)
+	result, createErr := s.k8sInterface.CoreV1().Services(s.config.Namespace).Create(svc)
 	if createErr != nil {
 
 		if errors.IsAlreadyExists(createErr) {
 
-			log.Debugf("Test '%s' - service already exists. Trying to get it...", t.testId)
-			tempResult, getErr := t.scenario.k8sInterface.CoreV1().Services(t.scenario.namespace).Get(svc.GetName(), k8sMeta.GetOptions{})
+			log.Debugf("Scenario '%s' - service already exists. Trying to get is...", s.id)
+			tempResult, getErr := s.k8sInterface.CoreV1().Services(s.config.Namespace).Get(svc.GetName(), k8sMeta.GetOptions{})
 			if getErr != nil {
 				log.Fatalf("Error getting existing service. Root cause: %v", getErr)
 			} else {
@@ -255,28 +276,28 @@ func (t *test) createServiceOrExit(deployment *k8sApps.Deployment) *k8sCore.Serv
 		}
 	}
 
-	log.Debugf("Test '%s' - service created", t.testId)
+	log.Debugf("Scenario '%s' - service created", s.id)
 	return result
 }
 
-func (t *test) createIngressOrExit(service *k8sCore.Service) *k8sExts.Ingress {
+func (s *scenario) createIngressOrExit(service *k8sCore.Service, resourceId string) *k8sExts.Ingress {
 
-	labels := stdLabels(t.testId)
+	labels := s.stdLabels(resourceId)
 
 	annotations := make(map[string]string)
 	annotations["kubernetes.io/ingress.class"] = "istio"
 
 	ing := &k8sExts.Ingress{
 		ObjectMeta: k8sMeta.ObjectMeta{
-			Name:        fmt.Sprintf("sample-app-%s", t.testId),
-			Namespace:   t.scenario.namespace,
+			Name:        resourceId,
+			Namespace:   s.config.Namespace,
 			Labels:      labels,
 			Annotations: annotations,
 		},
 		Spec: k8sExts.IngressSpec{
 			Rules: []k8sExts.IngressRule{
 				{
-					Host: t.hostnameFor(t.testId),
+					Host: s.hostnameFor(resourceId),
 					IngressRuleValue: k8sExts.IngressRuleValue{
 						HTTP: &k8sExts.HTTPIngressRuleValue{
 							Paths: []k8sExts.HTTPIngressPath{
@@ -295,16 +316,16 @@ func (t *test) createIngressOrExit(service *k8sCore.Service) *k8sExts.Ingress {
 		},
 	}
 
-	log.Debugf("Test '%s' - creating ingress: %+v", t.testId, ing)
+	log.Debugf("Scenario '%s' - creating ingress: %+v", s.id, ing)
 
-	result, createErr := t.scenario.k8sInterface.ExtensionsV1beta1().Ingresses(t.scenario.namespace).Create(ing)
+	result, createErr := s.k8sInterface.ExtensionsV1beta1().Ingresses(s.config.Namespace).Create(ing)
 
 	if createErr != nil {
 
 		if errors.IsAlreadyExists(createErr) {
 
-			log.Debugf("Test '%s' - ingress already exists. Trying to get it...", t.testId)
-			tempResult, getErr := t.scenario.k8sInterface.ExtensionsV1beta1().Ingresses(t.scenario.namespace).Get(ing.GetName(), k8sMeta.GetOptions{})
+			log.Debugf("Scenario '%s' - ingress already exists. Trying to get is...", s.id)
+			tempResult, getErr := s.k8sInterface.ExtensionsV1beta1().Ingresses(s.config.Namespace).Get(ing.GetName(), k8sMeta.GetOptions{})
 			if getErr != nil {
 				log.Fatalf("Error getting existing ingress. Root cause: %v", getErr)
 			} else {
@@ -315,22 +336,22 @@ func (t *test) createIngressOrExit(service *k8sCore.Service) *k8sExts.Ingress {
 		}
 	}
 
-	log.Debugf("Test '%s' - ingress created.", t.testId)
+	log.Debugf("Scenario '%s' - ingress created.", s.id)
 	return result
 }
 
-func (t *test) hostnameFor(testId string) string {
-	return fmt.Sprintf(t.scenario.hostnameFormat, testId)
+func (s *scenario) hostnameFor(resourceId string) string {
+	return fmt.Sprintf(s.config.HostnameFormat, resourceId)
 }
 
-func (t *test) callWithRetries(ingress *k8sExts.Ingress) error {
+func (s *scenario) callWithRetries(ingress *k8sExts.Ingress) error {
 
 	hostname := ingress.Spec.Rules[0].Host
 
-	log.Debugf("Test '%s' - calling: '%s'", t.testId, hostname)
+	log.Debugf("Scenario '%s' - calling: '%s'", s.id, hostname)
 
-	response, err := t.withRetries(func() (*http.Response, error) {
-		return t.scenario.httpClient.Get(fmt.Sprintf("http://%s/headers", hostname))
+	response, err := s.withRetries(func() (*http.Response, error) {
+		return s.httpClient.Get(fmt.Sprintf("http://%s/headers", hostname))
 	}, httpNotOkPredicate)
 
 	if err != nil {
@@ -345,7 +366,7 @@ func (t *test) callWithRetries(ingress *k8sExts.Ingress) error {
 	return nil
 }
 
-func (t *test) withRetries(httpCall func() (*http.Response, error), shouldRetryPredicate func(*http.Response) bool) (*http.Response, error) {
+func (s *scenario) withRetries(httpCall func() (*http.Response, error), shouldRetryPredicate func(*http.Response) bool) (*http.Response, error) {
 
 	var response *http.Response
 	var err error
@@ -353,13 +374,13 @@ func (t *test) withRetries(httpCall func() (*http.Response, error), shouldRetryP
 	retry := true
 	for retryNo := 0; retry; retryNo++ {
 
-		log.Debugf("[%d / %d] Retrying...", retryNo, t.scenario.maxRetries)
+		log.Debugf("[%d / %d] Retrying...", retryNo, s.config.MaxRetries)
 		response, err = httpCall()
 
 		if err != nil {
-			log.Errorf("[%d / %d] Got error: %s", retryNo, t.scenario.maxRetries, err)
+			log.Errorf("[%d / %d] Got error: %s", retryNo, s.config.MaxRetries, err)
 		} else if shouldRetryPredicate(response) {
-			log.Errorf("[%d / %d] Got response: %s", retryNo, t.scenario.maxRetries, response.Status)
+			log.Errorf("[%d / %d] Got response: %s", retryNo, s.config.MaxRetries, response.Status)
 		} else {
 			log.Infof("No more retries (got expected response).")
 			retry = false
@@ -367,12 +388,12 @@ func (t *test) withRetries(httpCall func() (*http.Response, error), shouldRetryP
 
 		if retry {
 
-			if retryNo >= t.scenario.maxRetries {
+			if retryNo >= s.config.MaxRetries {
 				// do not retry anymore
 				log.Infof("No more retries (max retries exceeded).")
 				retry = false
 			} else {
-				time.Sleep(t.scenario.retrySleep)
+				time.Sleep(s.config.RetryDelay)
 			}
 		}
 	}
@@ -384,7 +405,7 @@ func httpNotOkPredicate(response *http.Response) bool {
 	return response.StatusCode < 200 || response.StatusCode > 299
 }
 
-func generateTestId(n int) string {
+func generateId(n int) string {
 
 	rand.Seed(time.Now().UnixNano())
 
@@ -397,8 +418,11 @@ func generateTestId(n int) string {
 	return string(b)
 }
 
-func stdLabels(testId string) map[string]string {
+func (s *scenario) stdLabels(resourceId string) map[string]string {
 	labels := make(map[string]string)
-	labels["app"] = fmt.Sprintf("sample-app-%s", testId)
+	labels["scenario.id"] = s.id
+	labels["scenario.no"] = strconv.Itoa(s.no)
+	labels["resource.id"] = resourceId
+	labels["app"] = fmt.Sprintf("sample-app-%s", resourceId)
 	return labels
 }

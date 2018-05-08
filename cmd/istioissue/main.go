@@ -19,11 +19,7 @@ import (
 )
 
 const (
-	namespace                   = "default"
-	hostnameFormat              = "sample-app-%s.test.local"
-	hostnamePattern             = "sample-app-(.*).test.local"
-	maxRetries                  = 1000
-	retrySleep                  = 3 * time.Second
+	hostnamePattern             = "(.*).test.local"
 	ingressControllerServiceURL = "istio-ingress.istio-system.svc.cluster.local"
 )
 
@@ -34,15 +30,16 @@ func main() {
 	kubeConfig := defaultConfigOrExit()
 	k8sInterface := k8sInterfaceOrExit(kubeConfig)
 
-	ts := testscenario.New(
-		httpClient,
-		k8sInterface,
-		namespace,
-		hostnameFormat,
-		retrySleep,
-		maxRetries)
+	config := &testscenario.Config{
+		Namespace:      "default",
+		HostnameFormat: "%s.test.local",
+		RetryDelay:     3 * time.Second,
+		MaxRetries:     1000,
+		ResourcesCount: 30,
+		OperationDelay: 1 * time.Second,
+	}
 
-	ts.Run()
+	testscenario.Run(httpClient, k8sInterface, config)
 }
 
 func newHttpClientOrExit() *http.Client {
