@@ -13,7 +13,7 @@ This repository contains original Istio 0.7.1 with one adjustment - Ingress Cont
 
    - Golang 1.9 or newer
    - Kubectl 1.9 or newer
-   - Minikube 0.25.0 or newer
+   - Minikube 0.25.0 or newer (for 0.26.1 be aware of: https://github.com/kubernetes/minikube/issues/2765)
    - Hyperkit driver
 
 1. Clone this repository under your GOPATH src:
