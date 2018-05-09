@@ -16,33 +16,49 @@ import (
 	"os"
 	"regexp"
 	"github.com/dpacierpnik/istio-0.7-eds-issue/pkg/istioissue/testscenario"
+	"flag"
 )
 
 const (
-	namespace                   = "default"
-	hostnameFormat              = "sample-app-%s.test.local"
-	hostnamePattern             = "sample-app-(.*).test.local"
-	maxRetries                  = 1000
-	retrySleep                  = 3 * time.Second
+	hostnamePattern             = "(.*).test.local"
 	ingressControllerServiceURL = "istio-ingress.istio-system.svc.cluster.local"
 )
 
 func main() {
+
+	log.Info("Starting...")
 
 	httpClient := newHttpClientOrExit()
 
 	kubeConfig := defaultConfigOrExit()
 	k8sInterface := k8sInterfaceOrExit(kubeConfig)
 
-	ts := testscenario.New(
-		httpClient,
-		k8sInterface,
-		namespace,
-		hostnameFormat,
-		retrySleep,
-		maxRetries)
+	config := testScenarioConfig()
 
-	ts.Run()
+	testscenario.Run(httpClient, k8sInterface, config)
+}
+
+func testScenarioConfig() *testscenario.Config {
+
+	config := &testscenario.Config{
+		HostnameFormat:           "%s.test.local",
+	}
+
+	config.Namespace = *flag.String("namespace", "default", "Namespace for resources created in the test scenario")
+
+	retryDelay := *flag.Duration("retry-delay-seconds", 3, "Delay for retries of calling the application via the ingress")
+	config.RetryDelay = retryDelay * time.Second
+
+	config.MaxRetries = *flag.Int("max-retries", 1000, "Maximum number of retries of calling the application via the ingress")
+
+	config.NumberOfResourcesPerTest = *flag.Int("resources-per-test", 1, "Number of resources created for single run of the test scenario")
+
+	operationDelaySeconds := *flag.Duration("operation-delay-seconds", 1, "Delay for all operations of creating and deleting resources")
+	config.OperationDelay = operationDelaySeconds * time.Second
+
+	flag.Parse()
+
+	return config
 }
 
 func newHttpClientOrExit() *http.Client {

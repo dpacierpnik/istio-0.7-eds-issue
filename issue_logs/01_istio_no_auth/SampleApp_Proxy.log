@@ -1,0 +1,247 @@
+2018-04-30T14:11:56.147620Z	info	Version root@c5207293dc14-docker.io/istio-0.7.1-62110d4f0373a7613e57b8a4d559ded9cb6a1cc8-Clean
+2018-04-30T14:11:56.147661Z	info	Proxy role: model.Proxy{Type:"sidecar", IPAddress:"172.17.0.9", ID:"sample-app-zqyepnnn-7f57964b45-w4xxc.default", Domain:"default.svc.cluster.local"}
+2018-04-30T14:11:56.147668Z	info	Attempting to lookup address: istio-mixer.istio-system
+2018-04-30T14:11:56.149659Z	info	Addr resolved to: 10.110.137.204:9125
+2018-04-30T14:11:56.149725Z	info	Finished lookup of address: istio-mixer.istio-system
+2018-04-30T14:11:56.150059Z	info	Effective config: binaryPath: /usr/local/bin/envoy
+configPath: /etc/istio/proxy
+connectTimeout: 10.000s
+discoveryAddress: istio-pilot.istio-system:8080
+discoveryRefreshDelay: 1.000s
+drainDuration: 45.000s
+parentShutdownDuration: 60.000s
+proxyAdminPort: 15000
+serviceCluster: sample-app-zqyepnnn
+statsdUdpAddress: 10.110.137.204:9125
+zipkinAddress: zipkin.istio-system:9411
+
+2018-04-30T14:11:56.150084Z	info	Monitored certs: []v1.CertSource{v1.CertSource{Directory:"/etc/certs/", Files:[]string{"cert-chain.pem", "key.pem", "root-cert.pem"}}}
+2018-04-30T14:11:56.150232Z	info	Starting proxy agent
+2018-04-30T14:11:56.150324Z	info	Received new config, resetting budget
+2018-04-30T14:11:56.150341Z	info	Reconciling configuration (budget 10)
+2018-04-30T14:11:56.150347Z	info	Epoch 0 starting
+2018-04-30T14:11:56.150959Z	info	Envoy command: [-c /etc/istio/proxy/envoy-rev0.json --restart-epoch 0 --drain-time-s 45 --parent-shutdown-time-s 60 --service-cluster sample-app-zqyepnnn --service-node sidecar~172.17.0.9~sample-app-zqyepnnn-7f57964b45-w4xxc.default~default.svc.cluster.local --max-obj-name-len 189 -l info --v2-config-only]
+[2018-04-30 14:11:56.158][16][info][main] external/envoy/source/server/server.cc:178] initializing epoch 0 (hot restart version=9.200.16384.256.options=capacity=16384, num_slots=8209 hash=228984379728933363)
+[2018-04-30 14:11:56.161][16][info][config] external/envoy/source/server/configuration_impl.cc:52] loading 0 listener(s)
+[2018-04-30 14:11:56.161][16][info][config] external/envoy/source/server/configuration_impl.cc:92] loading tracing configuration
+[2018-04-30 14:11:56.161][16][info][config] external/envoy/source/server/configuration_impl.cc:101]   loading tracing driver: envoy.zipkin
+[2018-04-30 14:11:56.161][16][info][config] external/envoy/source/server/configuration_impl.cc:119] loading stats sink configuration
+[2018-04-30 14:11:56.161][16][info][main] external/envoy/source/server/server.cc:353] starting main dispatch loop
+[2018-04-30 14:11:56.165][16][info][upstream] external/envoy/source/common/upstream/cluster_manager_impl.cc:127] cm init: initializing cds
+[2018-04-30 14:11:56.166][16][info][upstream] external/envoy/source/common/upstream/cluster_manager_impl.cc:131] cm init: all clusters initialized
+[2018-04-30 14:11:56.166][16][info][main] external/envoy/source/server/server.cc:337] all clusters initialized. initializing init manager
+[2018-04-30 14:11:56.166][16][info][config] external/envoy/source/server/listener_manager_impl.cc:583] all dependencies initialized. starting workers
+[2018-04-30 14:11:56.166][16][info][upstream] external/envoy/source/server/lds_subscription.cc:70] lds: fetch failure: network error
+[2018-04-30 14:11:58.344][16][info][upstream] external/envoy/source/server/lds_subscription.cc:70] lds: fetch failure: network error
+[2018-04-30 14:12:00.870][16][info][upstream] external/envoy/source/server/lds_subscription.cc:70] lds: fetch failure: network error
+[2018-04-30 14:12:02.010][16][info][upstream] external/envoy/source/server/lds_api.cc:60] lds: add/update listener 'virtual'
+[2018-04-30 14:12:02.012][16][info][config] src/envoy/utils/config.cc:50] v2 mixer client config: transport {
+  check_cluster: "mixer_check_server"
+  report_cluster: "mixer_report_server"
+}
+mixer_attributes {
+}
+forward_attributes {
+  attributes {
+    key: "source.ip"
+    value {
+      bytes_value: "\000\000\000\000\000\000\000\000\000\000\377\377\254\021\000\t"
+    }
+  }
+  attributes {
+    key: "source.uid"
+    value {
+      string_value: "kubernetes://sample-app-zqyepnnn-7f57964b45-w4xxc.default"
+    }
+  }
+}
+
+[2018-04-30 14:12:02.012][16][info][upstream] external/envoy/source/server/lds_api.cc:60] lds: add/update listener 'http_0.0.0.0_15007'
+[2018-04-30 14:12:02.015][16][info][config] src/envoy/utils/config.cc:50] v2 mixer client config: transport {
+  check_cluster: "mixer_check_server"
+  report_cluster: "mixer_report_server"
+}
+mixer_attributes {
+}
+forward_attributes {
+  attributes {
+    key: "source.ip"
+    value {
+      bytes_value: "\000\000\000\000\000\000\000\000\000\000\377\377\254\021\000\t"
+    }
+  }
+  attributes {
+    key: "source.uid"
+    value {
+      string_value: "kubernetes://sample-app-zqyepnnn-7f57964b45-w4xxc.default"
+    }
+  }
+}
+
+[2018-04-30 14:12:02.015][16][info][upstream] external/envoy/source/server/lds_api.cc:60] lds: add/update listener 'http_0.0.0.0_15010'
+[2018-04-30 14:12:02.016][16][info][config] src/envoy/utils/config.cc:50] v2 mixer client config: transport {
+  check_cluster: "mixer_check_server"
+  report_cluster: "mixer_report_server"
+}
+mixer_attributes {
+}
+forward_attributes {
+  attributes {
+    key: "source.ip"
+    value {
+      bytes_value: "\000\000\000\000\000\000\000\000\000\000\377\377\254\021\000\t"
+    }
+  }
+  attributes {
+    key: "source.uid"
+    value {
+      string_value: "kubernetes://sample-app-zqyepnnn-7f57964b45-w4xxc.default"
+    }
+  }
+}
+
+[2018-04-30 14:12:02.016][16][info][upstream] external/envoy/source/server/lds_api.cc:60] lds: add/update listener 'http_0.0.0.0_80'
+[2018-04-30 14:12:02.017][16][info][config] src/envoy/utils/config.cc:50] v2 mixer client config: transport {
+  check_cluster: "mixer_check_server"
+  report_cluster: "mixer_report_server"
+}
+mixer_attributes {
+}
+forward_attributes {
+  attributes {
+    key: "source.ip"
+    value {
+      bytes_value: "\000\000\000\000\000\000\000\000\000\000\377\377\254\021\000\t"
+    }
+  }
+  attributes {
+    key: "source.uid"
+    value {
+      string_value: "kubernetes://sample-app-zqyepnnn-7f57964b45-w4xxc.default"
+    }
+  }
+}
+
+[2018-04-30 14:12:02.017][16][info][upstream] external/envoy/source/server/lds_api.cc:60] lds: add/update listener 'http_0.0.0.0_8080'
+[2018-04-30 14:12:02.018][16][info][config] src/envoy/utils/config.cc:50] v2 mixer client config: transport {
+  check_cluster: "mixer_check_server"
+  report_cluster: "mixer_report_server"
+}
+mixer_attributes {
+}
+forward_attributes {
+  attributes {
+    key: "source.ip"
+    value {
+      bytes_value: "\000\000\000\000\000\000\000\000\000\000\377\377\254\021\000\t"
+    }
+  }
+  attributes {
+    key: "source.uid"
+    value {
+      string_value: "kubernetes://sample-app-zqyepnnn-7f57964b45-w4xxc.default"
+    }
+  }
+}
+
+[2018-04-30 14:12:02.018][16][info][upstream] external/envoy/source/server/lds_api.cc:60] lds: add/update listener 'http_0.0.0.0_8888'
+[2018-04-30 14:12:02.019][16][info][config] src/envoy/utils/config.cc:50] v2 mixer client config: transport {
+  check_cluster: "mixer_check_server"
+  report_cluster: "mixer_report_server"
+}
+mixer_attributes {
+}
+forward_attributes {
+  attributes {
+    key: "source.ip"
+    value {
+      bytes_value: "\000\000\000\000\000\000\000\000\000\000\377\377\254\021\000\t"
+    }
+  }
+  attributes {
+    key: "source.uid"
+    value {
+      string_value: "kubernetes://sample-app-zqyepnnn-7f57964b45-w4xxc.default"
+    }
+  }
+}
+
+[2018-04-30 14:12:02.019][16][info][upstream] external/envoy/source/server/lds_api.cc:60] lds: add/update listener 'http_0.0.0.0_9093'
+[2018-04-30 14:12:02.019][16][info][upstream] external/envoy/source/server/lds_api.cc:60] lds: add/update listener 'tcp_10.104.70.219_15003'
+[2018-04-30 14:12:02.019][16][info][upstream] external/envoy/source/server/lds_api.cc:60] lds: add/update listener 'tcp_10.104.70.219_15005'
+[2018-04-30 14:12:02.019][16][info][upstream] external/envoy/source/server/lds_api.cc:60] lds: add/update listener 'tcp_10.104.70.219_443'
+[2018-04-30 14:12:02.020][16][info][upstream] external/envoy/source/server/lds_api.cc:60] lds: add/update listener 'tcp_10.108.173.160_443'
+[2018-04-30 14:12:02.020][16][info][upstream] external/envoy/source/server/lds_api.cc:60] lds: add/update listener 'tcp_10.110.137.204_15004'
+[2018-04-30 14:12:02.020][16][info][upstream] external/envoy/source/server/lds_api.cc:60] lds: add/update listener 'tcp_10.110.137.204_42422'
+[2018-04-30 14:12:02.020][16][info][upstream] external/envoy/source/server/lds_api.cc:60] lds: add/update listener 'tcp_10.110.137.204_9091'
+[2018-04-30 14:12:02.020][16][info][upstream] external/envoy/source/server/lds_api.cc:60] lds: add/update listener 'tcp_10.110.137.204_9094'
+[2018-04-30 14:12:02.021][16][info][upstream] external/envoy/source/server/lds_api.cc:60] lds: add/update listener 'tcp_10.110.137.204_9102'
+[2018-04-30 14:12:02.021][16][info][upstream] external/envoy/source/server/lds_api.cc:60] lds: add/update listener 'tcp_10.96.0.10_53'
+[2018-04-30 14:12:02.021][16][info][upstream] external/envoy/source/server/lds_api.cc:60] lds: add/update listener 'tcp_10.96.0.1_443'
+[2018-04-30 14:12:02.021][16][info][upstream] external/envoy/source/server/lds_api.cc:60] lds: add/update listener 'tcp_10.98.233.14_443'
+[2018-04-30 14:12:02.021][16][info][upstream] external/envoy/source/server/lds_api.cc:60] lds: add/update listener 'tcp_10.98.4.84_80'
+[2018-04-30 14:12:02.023][16][warning][upstream] external/envoy/source/common/router/rds_subscription.cc:64] rds: fetch failure: route: unknown cluster 'out.istio-mixer.istio-system.svc.cluster.local|http-monitoring'
+[2018-04-30 14:12:02.023][16][warning][upstream] external/envoy/source/common/router/rds_subscription.cc:64] rds: fetch failure: route: unknown cluster 'out.istio-pilot.istio-system.svc.cluster.local|http-discovery'
+[2018-04-30 14:12:02.024][16][warning][upstream] external/envoy/source/common/router/rds_subscription.cc:64] rds: fetch failure: route: unknown cluster 'out.sample-app-zqyepnnn.default.svc.cluster.local|http'
+[2018-04-30 14:12:02.024][16][warning][upstream] external/envoy/source/common/router/rds_subscription.cc:64] rds: fetch failure: route: unknown cluster 'out.istio-pilot.istio-system.svc.cluster.local|http-legacy-discovery'
+[2018-04-30 14:12:02.024][16][warning][upstream] external/envoy/source/common/router/rds_subscription.cc:64] rds: fetch failure: route: unknown cluster 'out.istio-pilot.istio-system.svc.cluster.local|grpc-discovery'
+[2018-04-30 14:12:02.025][16][warning][upstream] external/envoy/source/common/router/rds_subscription.cc:64] rds: fetch failure: route: unknown cluster 'out.istio-ingress.istio-system.svc.cluster.local|http'
+[2018-04-30 14:12:03.291][16][warning][upstream] external/envoy/source/common/router/rds_subscription.cc:64] rds: fetch failure: route: unknown cluster 'out.istio-pilot.istio-system.svc.cluster.local|grpc-discovery'
+[2018-04-30 14:12:03.332][16][warning][upstream] external/envoy/source/common/router/rds_subscription.cc:64] rds: fetch failure: route: unknown cluster 'out.istio-ingress.istio-system.svc.cluster.local|http'
+[2018-04-30 14:12:03.502][16][info][upstream] external/envoy/source/common/upstream/cluster_manager_impl.cc:388] add/update cluster out.istio-ingress.istio-system.svc.cluster.local|http starting warming
+[2018-04-30 14:12:03.502][16][info][upstream] external/envoy/source/common/upstream/cluster_manager_impl.cc:388] add/update cluster out.istio-ingress.istio-system.svc.cluster.local|https starting warming
+[2018-04-30 14:12:03.502][16][info][upstream] external/envoy/source/common/upstream/cluster_manager_impl.cc:388] add/update cluster out.istio-mixer.istio-system.svc.cluster.local|configapi starting warming
+[2018-04-30 14:12:03.502][16][info][upstream] external/envoy/source/common/upstream/cluster_manager_impl.cc:388] add/update cluster out.istio-mixer.istio-system.svc.cluster.local|http-monitoring starting warming
+[2018-04-30 14:12:03.502][16][info][upstream] external/envoy/source/common/upstream/cluster_manager_impl.cc:388] add/update cluster out.istio-mixer.istio-system.svc.cluster.local|prometheus starting warming
+[2018-04-30 14:12:03.503][16][info][upstream] external/envoy/source/common/upstream/cluster_manager_impl.cc:388] add/update cluster out.istio-mixer.istio-system.svc.cluster.local|statsd-prom starting warming
+[2018-04-30 14:12:03.503][16][info][upstream] external/envoy/source/common/upstream/cluster_manager_impl.cc:388] add/update cluster out.istio-mixer.istio-system.svc.cluster.local|tcp-mtls starting warming
+[2018-04-30 14:12:03.503][16][info][upstream] external/envoy/source/common/upstream/cluster_manager_impl.cc:388] add/update cluster out.istio-mixer.istio-system.svc.cluster.local|tcp-plain starting warming
+[2018-04-30 14:12:03.503][16][info][upstream] external/envoy/source/common/upstream/cluster_manager_impl.cc:388] add/update cluster out.istio-pilot.istio-system.svc.cluster.local|admission-webhook starting warming
+[2018-04-30 14:12:03.503][16][info][upstream] external/envoy/source/common/upstream/cluster_manager_impl.cc:388] add/update cluster out.istio-pilot.istio-system.svc.cluster.local|discovery starting warming
+[2018-04-30 14:12:03.503][16][info][upstream] external/envoy/source/common/upstream/cluster_manager_impl.cc:388] add/update cluster out.istio-pilot.istio-system.svc.cluster.local|grpc-discovery starting warming
+[2018-04-30 14:12:03.503][16][info][upstream] external/envoy/source/common/upstream/cluster_manager_impl.cc:388] add/update cluster out.istio-pilot.istio-system.svc.cluster.local|http-discovery starting warming
+[2018-04-30 14:12:03.503][16][info][upstream] external/envoy/source/common/upstream/cluster_manager_impl.cc:388] add/update cluster out.istio-pilot.istio-system.svc.cluster.local|http-legacy-discovery starting warming
+[2018-04-30 14:12:03.503][16][info][upstream] external/envoy/source/common/upstream/cluster_manager_impl.cc:388] add/update cluster out.istio-pilot.istio-system.svc.cluster.local|http-monitoring starting warming
+[2018-04-30 14:12:03.504][16][info][upstream] external/envoy/source/common/upstream/cluster_manager_impl.cc:388] add/update cluster out.istio-pilot.istio-system.svc.cluster.local|https-discovery starting warming
+[2018-04-30 14:12:03.504][16][info][upstream] external/envoy/source/common/upstream/cluster_manager_impl.cc:388] add/update cluster out.istio-sidecar-injector.istio-system.svc.cluster.local|https-webhook starting warming
+[2018-04-30 14:12:03.504][16][info][upstream] external/envoy/source/common/upstream/cluster_manager_impl.cc:388] add/update cluster out.kube-dns.kube-system.svc.cluster.local|dns-tcp starting warming
+[2018-04-30 14:12:03.504][16][info][upstream] external/envoy/source/common/upstream/cluster_manager_impl.cc:388] add/update cluster out.kubernetes-dashboard.kube-system.svc.cluster.local starting warming
+[2018-04-30 14:12:03.504][16][info][upstream] external/envoy/source/common/upstream/cluster_manager_impl.cc:388] add/update cluster out.kubernetes.default.svc.cluster.local|https starting warming
+[2018-04-30 14:12:03.504][16][info][upstream] external/envoy/source/common/upstream/cluster_manager_impl.cc:388] add/update cluster out.sample-app-zqyepnnn.default.svc.cluster.local|http starting warming
+[2018-04-30 14:12:03.504][16][info][upstream] external/envoy/source/common/upstream/cluster_manager_impl.cc:388] add/update cluster mixer_check_server starting warming
+[2018-04-30 14:12:03.505][16][info][upstream] external/envoy/source/common/upstream/cluster_manager_impl.cc:388] add/update cluster mixer_report_server starting warming
+[2018-04-30 14:12:03.505][16][info][upstream] external/envoy/source/common/upstream/cluster_manager_impl.cc:395] warming cluster mixer_check_server complete
+[2018-04-30 14:12:03.505][16][info][upstream] external/envoy/source/common/upstream/cluster_manager_impl.cc:395] warming cluster mixer_report_server complete
+[2018-04-30 14:12:03.507][16][info][upstream] external/envoy/source/common/upstream/cluster_manager_impl.cc:395] warming cluster out.istio-ingress.istio-system.svc.cluster.local|http complete
+[2018-04-30 14:12:03.507][16][info][upstream] external/envoy/source/common/upstream/cluster_manager_impl.cc:395] warming cluster out.istio-ingress.istio-system.svc.cluster.local|https complete
+[2018-04-30 14:12:03.508][16][info][upstream] external/envoy/source/common/upstream/cluster_manager_impl.cc:395] warming cluster out.istio-mixer.istio-system.svc.cluster.local|configapi complete
+[2018-04-30 14:12:03.508][16][info][upstream] external/envoy/source/common/upstream/cluster_manager_impl.cc:395] warming cluster out.istio-mixer.istio-system.svc.cluster.local|http-monitoring complete
+[2018-04-30 14:12:03.509][16][info][upstream] external/envoy/source/common/upstream/cluster_manager_impl.cc:395] warming cluster out.istio-mixer.istio-system.svc.cluster.local|prometheus complete
+[2018-04-30 14:12:03.509][16][info][upstream] external/envoy/source/common/upstream/cluster_manager_impl.cc:395] warming cluster out.istio-mixer.istio-system.svc.cluster.local|statsd-prom complete
+[2018-04-30 14:12:03.509][16][info][upstream] external/envoy/source/common/upstream/cluster_manager_impl.cc:395] warming cluster out.istio-mixer.istio-system.svc.cluster.local|tcp-mtls complete
+[2018-04-30 14:12:03.510][16][info][upstream] external/envoy/source/common/upstream/cluster_manager_impl.cc:395] warming cluster out.istio-mixer.istio-system.svc.cluster.local|tcp-plain complete
+[2018-04-30 14:12:03.510][16][info][upstream] external/envoy/source/common/upstream/cluster_manager_impl.cc:395] warming cluster out.istio-pilot.istio-system.svc.cluster.local|discovery complete
+[2018-04-30 14:12:03.511][16][info][upstream] external/envoy/source/common/upstream/cluster_manager_impl.cc:395] warming cluster out.istio-pilot.istio-system.svc.cluster.local|admission-webhook complete
+[2018-04-30 14:12:03.511][16][info][upstream] external/envoy/source/common/upstream/cluster_manager_impl.cc:395] warming cluster out.istio-pilot.istio-system.svc.cluster.local|grpc-discovery complete
+[2018-04-30 14:12:03.516][16][info][upstream] external/envoy/source/common/upstream/cluster_manager_impl.cc:395] warming cluster out.istio-pilot.istio-system.svc.cluster.local|http-discovery complete
+[2018-04-30 14:12:03.516][16][info][upstream] external/envoy/source/common/upstream/cluster_manager_impl.cc:395] warming cluster out.istio-pilot.istio-system.svc.cluster.local|http-legacy-discovery complete
+[2018-04-30 14:12:03.516][16][info][upstream] external/envoy/source/common/upstream/cluster_manager_impl.cc:395] warming cluster out.istio-pilot.istio-system.svc.cluster.local|http-monitoring complete
+[2018-04-30 14:12:03.516][16][info][upstream] external/envoy/source/common/upstream/cluster_manager_impl.cc:395] warming cluster out.istio-pilot.istio-system.svc.cluster.local|https-discovery complete
+[2018-04-30 14:12:03.516][16][info][upstream] external/envoy/source/common/upstream/cluster_manager_impl.cc:395] warming cluster out.istio-sidecar-injector.istio-system.svc.cluster.local|https-webhook complete
+[2018-04-30 14:12:03.516][16][info][upstream] external/envoy/source/common/upstream/cluster_manager_impl.cc:395] warming cluster out.kube-dns.kube-system.svc.cluster.local|dns-tcp complete
+[2018-04-30 14:12:03.516][16][info][upstream] external/envoy/source/common/upstream/cluster_manager_impl.cc:395] warming cluster out.kubernetes-dashboard.kube-system.svc.cluster.local complete
+[2018-04-30 14:12:03.516][16][info][upstream] external/envoy/source/common/upstream/cluster_manager_impl.cc:395] warming cluster out.kubernetes.default.svc.cluster.local|https complete
+[2018-04-30 14:12:03.516][16][info][upstream] external/envoy/source/common/upstream/cluster_manager_impl.cc:395] warming cluster out.sample-app-zqyepnnn.default.svc.cluster.local|http complete
+2018-04-30T14:12:26.152313Z	info	Received 404 status from pilot when retrieving availability zone: AvailabilityZone couldn't find the given cluster node
+2018-04-30T14:12:56.153619Z	info	Proxy availability zone: 
+[2018-04-30 14:12:56.166][16][info][main] external/envoy/source/server/drain_manager_impl.cc:63] shutting down parent after drain
+2018-04-30T14:13:26.155494Z	info	Proxy availability zone: 
+2018-04-30T14:13:56.158748Z	info	Proxy availability zone: 
+2018-04-30T14:14:26.159861Z	info	Proxy availability zone: 
+2018-04-30T14:14:56.160828Z	info	Proxy availability zone: 
+2018-04-30T14:15:26.161926Z	info	Proxy availability zone: 
+2018-04-30T14:15:56.163811Z	info	Proxy availability zone: 
+2018-04-30T14:16:26.164655Z	info	Proxy availability zone: 
+2018-04-30T14:16:56.166326Z	info	Proxy availability zone: 
+2018-04-30T14:17:26.167830Z	info	Proxy availability zone: 
+2018-04-30T14:17:26.168269Z	info	Availability zone not set, proxy will default to not using zone aware routing.
