@@ -15,7 +15,7 @@ import (
 	"path/filepath"
 	"os"
 	"regexp"
-	"github.com/dpacierpnik/istio-0.7-eds-issue/pkg/istioissue/testscenario"
+	"github.com/dpacierpnik/istio-0.7-issues/pkg/istioissue/testscenario"
 	"flag"
 )
 
@@ -26,39 +26,36 @@ const (
 
 func main() {
 
-	log.Info("Starting...")
+	config := testScenarioConfig()
+
+	log.Infof("Starting with config: %+v...", *config)
 
 	httpClient := newHttpClientOrExit()
 
 	kubeConfig := defaultConfigOrExit()
 	k8sInterface := k8sInterfaceOrExit(kubeConfig)
 
-	config := testScenarioConfig()
-
 	testscenario.Run(httpClient, k8sInterface, config)
 }
 
 func testScenarioConfig() *testscenario.Config {
 
-	config := &testscenario.Config{
-		HostnameFormat:           "%s.test.local",
-	}
-
-	config.Namespace = *flag.String("namespace", "default", "Namespace for resources created in the test scenario")
-
-	retryDelay := *flag.Duration("retry-delay-seconds", 3, "Delay for retries of calling the application via the ingress")
-	config.RetryDelay = retryDelay * time.Second
-
-	config.MaxRetries = *flag.Int("max-retries", 1000, "Maximum number of retries of calling the application via the ingress")
-
-	config.NumberOfResourcesPerTest = *flag.Int("resources-per-test", 1, "Number of resources created for single run of the test scenario")
-
-	operationDelaySeconds := *flag.Duration("operation-delay-seconds", 1, "Delay for all operations of creating and deleting resources")
-	config.OperationDelay = operationDelaySeconds * time.Second
+	namespace := flag.String("namespace", "default", "Namespace for resources created in the test scenario")
+	resourcesPerTest := flag.Int("resources-per-test", 1, "Number of resources created for single run of the test scenario")
+	retryDelay := flag.Duration("retry-delay-seconds", 3, "Delay for retries of calling the application via the ingress")
+	maxRetries := flag.Int("max-retries", 1000, "Maximum number of retries of calling the application via the ingress")
+	operationDelaySeconds := flag.Duration("operation-delay-seconds", 1, "Delay for all operations of creating and deleting resources")
 
 	flag.Parse()
 
-	return config
+	return &testscenario.Config{
+		HostnameFormat:           "%s.test.local",
+		Namespace:                *namespace,
+		RetryDelay:               *retryDelay * time.Second,
+		MaxRetries:               *maxRetries,
+		NumberOfResourcesPerTest: *resourcesPerTest,
+		OperationDelay:           *operationDelaySeconds * time.Second,
+	}
 }
 
 func newHttpClientOrExit() *http.Client {
