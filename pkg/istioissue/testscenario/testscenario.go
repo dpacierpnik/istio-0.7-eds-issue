@@ -21,12 +21,12 @@ const (
 )
 
 type Config struct {
-	Namespace      string
-	HostnameFormat string
-	RetryDelay     time.Duration
-	MaxRetries     int
-	ResourcesCount int
-	OperationDelay time.Duration
+	Namespace                string
+	HostnameFormat           string
+	RetryDelay               time.Duration
+	MaxRetries               int
+	NumberOfResourcesPerTest int
+	OperationDelay           time.Duration
 }
 
 func Run(httpClient *http.Client, k8sInterface kubernetes.Interface, config *Config) {
@@ -41,9 +41,7 @@ func Run(httpClient *http.Client, k8sInterface kubernetes.Interface, config *Con
 
 		scenarioNo++
 		s := newScenario(httpClient, k8sInterface, config, scenarioNo)
-
 		err := s.run()
-
 		if err != nil {
 			failureNo++
 			log.Warnf("### Found issue! (failures count: %d / %d)", failureNo, scenarioNo)
@@ -74,17 +72,18 @@ func newScenario(httpClient *http.Client, k8sInterface kubernetes.Interface, con
 
 func (s *scenario) run() error {
 
-	log.Infof("[%d] Running scenario: '%s'", s.no, s.id)
-	tc := newCleanup(s, s.config.ResourcesCount)
+	log.Info("############################################################")
+	log.Infof("[%d] Running scenario: '%s'...", s.no, s.id)
+	tc := newCleanup(s, s.config.NumberOfResourcesPerTest)
 	defer tc.run()
 
 	var lastIngress *k8sExts.Ingress
 
-	for i := 0; i < s.config.ResourcesCount; i++ {
+	for i := 0; i < s.config.NumberOfResourcesPerTest; i++ {
 
 		resourceId := fmt.Sprintf("sample-app-%s-%d", s.id, i)
 
-		log.Infof("Scenario '%s' - creating resources: '%s'", s.id, resourceId)
+		log.Infof("Scenario '%s' - creating resources: '%s'...", s.id, resourceId)
 
 		deployment := s.createDeploymentOrExit(resourceId)
 		tc.deployments[i] = deployment
@@ -107,57 +106,11 @@ func (s *scenario) run() error {
 	err := s.callWithRetries(lastIngress)
 
 	if err == nil {
-		log.Infof("Scenario '%s' succeed", s.id)
+		log.Infof("Scenario '%s' - SUCCEED", s.id)
 	} else {
-		log.Infof("Scenario '%s' failed with: %v", s.id, err)
+		log.Infof("Scenario '%s' - FAILED with: %v", s.id, err)
 	}
-	log.Info("############################################################")
 	return err
-}
-
-type scenarioCleanup struct {
-	scenario    *scenario
-	deployments []*k8sApps.Deployment
-	services    []*k8sCore.Service
-	ingresses   []*k8sExts.Ingress
-}
-
-func newCleanup(scenario *scenario, resourcesCount int) *scenarioCleanup {
-
-	tc := &scenarioCleanup{
-		scenario: scenario,
-	}
-	tc.deployments = make([]*k8sApps.Deployment, resourcesCount)
-	tc.services = make([]*k8sCore.Service, resourcesCount)
-	tc.ingresses = make([]*k8sExts.Ingress, resourcesCount)
-	return tc
-}
-
-func (c *scenarioCleanup) run() {
-
-	for _, ingress := range c.ingresses {
-		delErr := c.scenario.k8sInterface.ExtensionsV1beta1().Ingresses(c.scenario.config.Namespace).Delete(ingress.Name, &k8sMeta.DeleteOptions{})
-		if delErr != nil {
-			log.Warnf("Scenario '%s' - can not delete ingress '%s'. Root cause: %+v", c.scenario.id, ingress.Name, delErr)
-		}
-		time.Sleep(c.scenario.config.OperationDelay)
-	}
-
-	for _, service := range c.services {
-		delErr := c.scenario.k8sInterface.CoreV1().Services(c.scenario.config.Namespace).Delete(service.Name, &k8sMeta.DeleteOptions{})
-		if delErr != nil {
-			log.Warnf("Scenario '%s' - can not delete service '%s'. Root cause: %+v", c.scenario.id, service.Name, delErr)
-		}
-		time.Sleep(c.scenario.config.OperationDelay)
-	}
-
-	for _, deployment := range c.deployments {
-		delErr := c.scenario.k8sInterface.AppsV1().Deployments(c.scenario.config.Namespace).Delete(deployment.Name, &k8sMeta.DeleteOptions{})
-		if delErr != nil {
-			log.Warnf("Scenario '%s' - can not delete deployment '%s'. Root cause: %+v", c.scenario.id, deployment.Name, delErr)
-		}
-		time.Sleep(c.scenario.config.OperationDelay)
-	}
 }
 
 func (s *scenario) createDeploymentOrExit(resourceId string) *k8sApps.Deployment {
@@ -194,11 +147,6 @@ func (s *scenario) createDeploymentOrExit(resourceId string) *k8sApps.Deployment
 									ContainerPort: 8000,
 								},
 							},
-						},
-					},
-					ImagePullSecrets: []k8sCore.LocalObjectReference{
-						{
-							Name: "team-sf-artifactory-user",
 						},
 					},
 				},
@@ -340,6 +288,65 @@ func (s *scenario) createIngressOrExit(service *k8sCore.Service, resourceId stri
 	return result
 }
 
+
+type scenarioCleanup struct {
+	scenario    *scenario
+	deployments []*k8sApps.Deployment
+	services    []*k8sCore.Service
+	ingresses   []*k8sExts.Ingress
+}
+
+func newCleanup(scenario *scenario, resourcesCount int) *scenarioCleanup {
+
+	tc := &scenarioCleanup{
+		scenario: scenario,
+	}
+	tc.deployments = make([]*k8sApps.Deployment, resourcesCount)
+	tc.services = make([]*k8sCore.Service, resourcesCount)
+	tc.ingresses = make([]*k8sExts.Ingress, resourcesCount)
+	return tc
+}
+
+func (c *scenarioCleanup) run() {
+
+	log.Infof("Scenario '%s' - cleanup...", c.scenario.id)
+
+	for _, ingress := range c.ingresses {
+		delErr := c.scenario.k8sInterface.ExtensionsV1beta1().Ingresses(c.scenario.config.Namespace).Delete(ingress.Name, &k8sMeta.DeleteOptions{})
+		if delErr != nil {
+			log.Warnf("Scenario '%s' - can not delete ingress '%s'. Root cause: %+v", c.scenario.id, ingress.Name, delErr)
+		}
+		time.Sleep(c.scenario.config.OperationDelay)
+	}
+
+	for _, service := range c.services {
+		delErr := c.scenario.k8sInterface.CoreV1().Services(c.scenario.config.Namespace).Delete(service.Name, &k8sMeta.DeleteOptions{})
+		if delErr != nil {
+			log.Warnf("Scenario '%s' - can not delete service '%s'. Root cause: %+v", c.scenario.id, service.Name, delErr)
+		}
+		time.Sleep(c.scenario.config.OperationDelay)
+	}
+
+	for _, deployment := range c.deployments {
+		delErr := c.scenario.k8sInterface.AppsV1().Deployments(c.scenario.config.Namespace).Delete(deployment.Name, &k8sMeta.DeleteOptions{})
+		if delErr != nil {
+			log.Warnf("Scenario '%s' - can not delete deployment '%s'. Root cause: %+v", c.scenario.id, deployment.Name, delErr)
+		}
+		time.Sleep(c.scenario.config.OperationDelay)
+	}
+
+	log.Debugf("Scenario '%s' - cleanup done.", c.scenario.id)
+}
+
+func (s *scenario) stdLabels(resourceId string) map[string]string {
+	labels := make(map[string]string)
+	labels["scenario.id"] = s.id
+	labels["scenario.no"] = strconv.Itoa(s.no)
+	labels["resource.id"] = resourceId
+	labels["app"] = fmt.Sprintf("sample-app-%s", resourceId)
+	return labels
+}
+
 func (s *scenario) hostnameFor(resourceId string) string {
 	return fmt.Sprintf(s.config.HostnameFormat, resourceId)
 }
@@ -416,13 +423,4 @@ func generateId(n int) string {
 		b[i] = letterRunes[rand.Intn(len(letterRunes))]
 	}
 	return string(b)
-}
-
-func (s *scenario) stdLabels(resourceId string) map[string]string {
-	labels := make(map[string]string)
-	labels["scenario.id"] = s.id
-	labels["scenario.no"] = strconv.Itoa(s.no)
-	labels["resource.id"] = resourceId
-	labels["app"] = fmt.Sprintf("sample-app-%s", resourceId)
-	return labels
 }
