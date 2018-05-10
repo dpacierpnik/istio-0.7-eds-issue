@@ -28,7 +28,7 @@ This repository contains original Istio 0.7.1 with one adjustment - Ingress Cont
 1. Go to the issue directory:
 
    ```bash
-   cd istio-0.7-eds-issue
+   cd istio-0.7-issues
    ```
 
 1. Ensure dependencies, and build app:
@@ -127,7 +127,7 @@ created by istio.io/istio/pilot/pkg/proxy/envoy/v2.(*DiscoveryServer).StreamEndp
 	/workspace/go/src/istio.io/istio/pilot/pkg/proxy/envoy/v2/eds.go:296 +0x2a0
 ```
 
-Results of the test can be found here: [issue_logs/01_istio_no_auth](./issue_logs/01_istio_no_auth)
+Results of the test can be found here: **issue_logs/01_istio_no_auth**
 
 ### 02 - Failing Pilot (auth enabled)
 
@@ -166,7 +166,7 @@ Results of the test can be found here: [issue_logs/01_istio_no_auth](./issue_log
 After some time (it is random how long it takes) Pilot starts to fail and is restarted all the time.
 It causes applications are not available for a long time.
 
-Results of the test can be found here: [issue_logs/02_istio_with_auth](./issue_logs/02_istio_with_auth)
+Results of the test can be found here: **issue_logs/02_istio_with_auth**
 
 ### 03 - Many resources - envoy never knows about application (auth disabled)
 
@@ -206,4 +206,4 @@ After few runs, Istio starts to be unstable.
 Application is not available at all (*Ingress Controller* returns 404s all the time).
 It looks like *Ingress Controller* (*Envoy*) never knows about application. 
 
-Results of the test can be found here: [issue_logs/istio_no_auth_many_resources](./issue_logs/istio_no_auth_many_resources)
+Results of the test can be found here: **issue_logs/istio_no_auth_many_resources**
