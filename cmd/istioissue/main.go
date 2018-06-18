@@ -45,6 +45,7 @@ func testScenarioConfig() *testscenario.Config {
 	retryDelay := flag.Duration("retry-delay-seconds", 3, "Delay for retries of calling the application via the ingress")
 	maxRetries := flag.Int("max-retries", 1000, "Maximum number of retries of calling the application via the ingress")
 	operationDelaySeconds := flag.Duration("operation-delay-seconds", 1, "Delay for all operations of creating and deleting resources")
+	minOkResponsesToSucceed := flag.Int("min-ok-responses-to-succeed", 1, "Minimum number of OK responses from the application called via the ingress, before test is considered successful")
 
 	flag.Parse()
 
@@ -55,6 +56,7 @@ func testScenarioConfig() *testscenario.Config {
 		MaxRetries:               *maxRetries,
 		NumberOfResourcesPerTest: *resourcesPerTest,
 		OperationDelay:           *operationDelaySeconds * time.Second,
+		MinOkResponsesToSucceed:  *minOkResponsesToSucceed,
 	}
 }
 

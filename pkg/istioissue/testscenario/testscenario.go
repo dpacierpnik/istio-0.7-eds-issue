@@ -27,6 +27,7 @@ type Config struct {
 	MaxRetries               int
 	NumberOfResourcesPerTest int
 	OperationDelay           time.Duration
+	MinOkResponsesToSucceed  int
 }
 
 func Run(httpClient *http.Client, k8sInterface kubernetes.Interface, config *Config) {
@@ -104,7 +105,6 @@ func (s *scenario) run() error {
 	}
 
 	err := s.callWithRetries(lastIngress)
-
 	if err == nil {
 		log.Infof("Scenario '%s' - SUCCEED", s.id)
 	} else {
@@ -164,12 +164,12 @@ func (s *scenario) createDeploymentOrExit(resourceId string) *k8sApps.Deployment
 			log.Debugf("Scenario '%s' - deployment already exists. Trying to get is...", s.id)
 			tempResult, getErr := s.k8sInterface.AppsV1().Deployments(s.config.Namespace).Get(deployment.GetName(), k8sMeta.GetOptions{})
 			if getErr != nil {
-				log.Fatalf("Error getting existing deploymens. Root cause: %v", getErr)
+				log.Fatalf("Error getting existing deployment. Root cause: %v", getErr)
 			} else {
 				result = tempResult
 			}
 		} else {
-			log.Fatalf("Error creating deploymens. Root cause: %v", createErr)
+			log.Fatalf("Error creating deployment. Root cause: %v", createErr)
 		}
 	}
 
@@ -288,7 +288,6 @@ func (s *scenario) createIngressOrExit(service *k8sCore.Service, resourceId stri
 	return result
 }
 
-
 type scenarioCleanup struct {
 	scenario    *scenario
 	deployments []*k8sApps.Deployment
@@ -359,7 +358,7 @@ func (s *scenario) callWithRetries(ingress *k8sExts.Ingress) error {
 
 	response, err := s.withRetries(func() (*http.Response, error) {
 		return s.httpClient.Get(fmt.Sprintf("http://%s/headers", hostname))
-	}, httpNotOkPredicate)
+	}, httpNotOkPredicate, s.config.MaxRetries, s.config.RetryDelay)
 
 	if err != nil {
 		return fmt.Errorf("can not call '%s'. Root cause: %v", hostname, err)
@@ -369,11 +368,26 @@ func (s *scenario) callWithRetries(ingress *k8sExts.Ingress) error {
 
 	if failed {
 		return fmt.Errorf("can not call '%s'. Response status: %s", hostname, response.Status)
+	} else if s.config.MinOkResponsesToSucceed > 1 {
+
+		nextResponse, nextErr := s.withRetries(func() (*http.Response, error) {
+			return s.httpClient.Get(fmt.Sprintf("http://%s/headers", hostname))
+		}, httpOkPredicate, s.config.MinOkResponsesToSucceed, s.config.RetryDelay)
+
+		if nextErr != nil {
+			return fmt.Errorf("can not call '%s'. Root cause: %v", hostname, nextErr)
+		}
+
+		failedAgain := httpNotOkPredicate(nextResponse)
+		if failedAgain {
+			return fmt.Errorf(" can not call '%s' AGAIN. Response status: %s", hostname, response.Status)
+		}
 	}
 	return nil
 }
 
-func (s *scenario) withRetries(httpCall func() (*http.Response, error), shouldRetryPredicate func(*http.Response) bool) (*http.Response, error) {
+func (s *scenario) withRetries(httpCall func() (*http.Response, error), shouldRetryPredicate func(*http.Response) bool,
+	maxRetries int, retryDelay time.Duration) (*http.Response, error) {
 
 	var response *http.Response
 	var err error
@@ -381,13 +395,13 @@ func (s *scenario) withRetries(httpCall func() (*http.Response, error), shouldRe
 	retry := true
 	for retryNo := 0; retry; retryNo++ {
 
-		log.Debugf("[%d / %d] Retrying...", retryNo, s.config.MaxRetries)
+		log.Debugf("[%d / %d] Retrying...", retryNo, maxRetries)
 		response, err = httpCall()
 
 		if err != nil {
-			log.Errorf("[%d / %d] Got error: %s", retryNo, s.config.MaxRetries, err)
+			log.Errorf("[%d / %d] Got error: %s", retryNo, maxRetries, err)
 		} else if shouldRetryPredicate(response) {
-			log.Errorf("[%d / %d] Got response: %s", retryNo, s.config.MaxRetries, response.Status)
+			log.Infof("[%d / %d] Got response: %s", retryNo, maxRetries, response.Status)
 		} else {
 			log.Infof("No more retries (got expected response).")
 			retry = false
@@ -395,7 +409,7 @@ func (s *scenario) withRetries(httpCall func() (*http.Response, error), shouldRe
 
 		if retry {
 
-			if retryNo >= s.config.MaxRetries {
+			if retryNo >= maxRetries {
 				// do not retry anymore
 				log.Infof("No more retries (max retries exceeded).")
 				retry = false
@@ -409,7 +423,11 @@ func (s *scenario) withRetries(httpCall func() (*http.Response, error), shouldRe
 }
 
 func httpNotOkPredicate(response *http.Response) bool {
-	return response.StatusCode < 200 || response.StatusCode > 299
+	return !httpOkPredicate(response)
+}
+
+func httpOkPredicate(response *http.Response) bool {
+	return response.StatusCode >= 200 && response.StatusCode < 300
 }
 
 func generateId(n int) string {
