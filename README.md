@@ -41,7 +41,7 @@ This repository contains original Istio 0.7.1 with one adjustment - Ingress Cont
 1. Run minikube:
 
    ```bash
-   minikube start --vm-driver=hyperkit --memory=4096 \
+   minikube start --vm-driver=hyperkit --memory=8192 \
 	  --extra-config=controller-manager.ClusterSigningCertFile="/var/lib/localkube/certs/ca.crt" \
 	  --extra-config=controller-manager.ClusterSigningKeyFile="/var/lib/localkube/certs/ca.key" \
 	  --extra-config=apiserver.Admission.PluginNames=NamespaceLifecycle,LimitRanger,ServiceAccount,PersistentVolumeLabel,DefaultStorageClass,DefaultTolerationSeconds,MutatingAdmissionWebhook,ValidatingAdmissionWebhook,ResourceQuota \

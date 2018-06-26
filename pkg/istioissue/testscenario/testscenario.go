@@ -30,9 +30,10 @@ type Config struct {
 	MinOkResponsesToSucceed  int
 }
 
+
 func Run(httpClient *http.Client, k8sInterface kubernetes.Interface, config *Config) {
 
-	log.SetLevel(log.InfoLevel)
+	log.SetLevel(log.DebugLevel)
 
 	scenarioNo := 0
 	failureNo := 0

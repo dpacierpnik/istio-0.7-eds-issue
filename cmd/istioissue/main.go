@@ -24,6 +24,11 @@ const (
 	ingressControllerServiceURL = "istio-ingress.istio-system.svc.cluster.local"
 )
 
+func init() {
+
+	log.SetLevel(log.DebugLevel)
+}
+
 func main() {
 
 	config := testScenarioConfig()
@@ -41,11 +46,11 @@ func main() {
 func testScenarioConfig() *testscenario.Config {
 
 	namespace := flag.String("namespace", "default", "Namespace for resources created in the test scenario")
-	resourcesPerTest := flag.Int("resources-per-test", 1, "Number of resources created for single run of the test scenario")
+	resourcesPerTest := flag.Int("resources-per-test", 30, "Number of resources created for single run of the test scenario")
 	retryDelay := flag.Duration("retry-delay-seconds", 3, "Delay for retries of calling the application via the ingress")
 	maxRetries := flag.Int("max-retries", 1000, "Maximum number of retries of calling the application via the ingress")
 	operationDelaySeconds := flag.Duration("operation-delay-seconds", 1, "Delay for all operations of creating and deleting resources")
-	minOkResponsesToSucceed := flag.Int("min-ok-responses-to-succeed", 1, "Minimum number of OK responses from the application called via the ingress, before test is considered successful")
+	minOkResponsesToSucceed := flag.Int("min-ok-responses-to-succeed", 20, "Minimum number of OK responses from the application called via the ingress, before test is considered successful")
 
 	flag.Parse()
 
